@@ -1,15 +1,17 @@
 using Clang.Generators
-using MLX_C_jll
+
+using Pkg.Artifacts
+mlx_c_artifact_dir = artifact"MLX_C"
 
 cd(@__DIR__)
 
-include_dir = joinpath(MLX_C_jll.artifact_dir, "include", "mlx", "c")
+include_dir = joinpath(mlx_c_artifact_dir, "include", "mlx")
 
 options = load_options(joinpath(@__DIR__, "generator.toml"))
 
 args = get_default_args()
 push!(args, "-I$include_dir")
-push!(args, "-I$(joinpath(MLX_C_jll.artifact_dir, "include", "mlx"))")
+push!(args, "-I$(joinpath(mlx_c_artifact_dir, "include", "mlx"))")
 
 headers = [
     joinpath(include_dir, header) for
