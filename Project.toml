@@ -1,0 +1,13 @@
+name = "MLX"
+uuid = "2511d5ad-8379-46e2-bc02-295049ea6dac"
+authors = ["Jesper Stemann Andersen and contributors"]
+version = "0.1.0"
+
+[compat]
+julia = "1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
