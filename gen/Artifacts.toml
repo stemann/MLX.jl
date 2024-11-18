@@ -1,0 +1,8 @@
+[[MLX_C]]
+arch = "x86_64"
+git-tree-sha1 = "85d9ccf344f30769fbd6104348475157fb8af5b8"
+os = "macos"
+
+    [[MLX_C.download]]
+    sha256 = "87fec2ebfeed5ff6540bd3b3a52ea46813b668b3dd379b31a8e4b206e22c9bad"
+    url = "https://buildkite.com/organizations/julialang/pipelines/yggdrasil/builds/14779/jobs/01934045-8c91-4208-bee4-bc05afdaeec3/artifacts/0193404e-2daa-4328-a584-564ac9ea8d86"
