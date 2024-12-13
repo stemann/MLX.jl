@@ -7,4 +7,5 @@ using Test
     if !Sys.iswindows() # Windows is hanging
         include(joinpath(@__DIR__, "stream_tests.jl"))
     end
+    include(joinpath(@__DIR__, "string_tests.jl"))
 end
