@@ -4,7 +4,6 @@ end
 
 function error_handler(s::Ptr{Cchar})::Cvoid
     throw(MLXException(unsafe_string(s)))
-    return nothing
 end
 
 function register_error_handler()
