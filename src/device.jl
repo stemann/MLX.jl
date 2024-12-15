@@ -27,21 +27,32 @@ function Base.getproperty(device::Device, name::Symbol)
     return getfield(device, name)
 end
 
-Base.propertynames(::Device) = (fieldnames(Device)..., :type)
+Base.propertynames(::Device) = (:type, fieldnames(Device)...)
 
 function Base.setproperty!(device::Device, name::Symbol, value)
     if name == :type
         throw(ArgumentError("Cannot set device type"))
     end
-    throw(ArgumentError("Cannot set field $name"))
+    throw(ArgumentError("Field $name should not be set"))
 end
 
 # TODO This should return, e.g., "Device(; device_type = DeviceTypeCPU, index = 0)", and not "Device(cpu, 0)" (the result from mlx_device_tostring)
 function Base.show(io::IO, device::Device)
-    mlx_str = Wrapper.mlx_string_new_data(pointer("")) # Workaround for mlx_string_new()
-    Wrapper.mlx_device_tostring(Ref(mlx_str), device.mlx_device)
-    str = unsafe_string(Wrapper.mlx_string_data(mlx_str))
-    Wrapper.mlx_string_free(mlx_str)
+    mlx_str = Ref(Wrapper.mlx_string_new())
+    Wrapper.mlx_device_tostring(mlx_str, device.mlx_device)
+    str = unsafe_string(Wrapper.mlx_string_data(mlx_str[]))
+    Wrapper.mlx_string_free(mlx_str[])
     print(io, str)
+    return nothing
+end
+
+function default_device()
+    mlx_device = Ref(Wrapper.mlx_device_new())
+    Wrapper.mlx_get_default_device(mlx_device)
+    return Device(mlx_device[])
+end
+
+function set_default_device(device::Device)
+    Wrapper.mlx_set_default_device(device.mlx_device)
     return nothing
 end
