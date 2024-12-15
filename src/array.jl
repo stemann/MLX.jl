@@ -124,10 +124,12 @@ function Base.unsafe_convert(::Type{Ptr{T}}, array::MLXArray{T, N}) where {T, N}
         mlx_array_data = Wrapper.mlx_array_data_int32
     elseif T == Int64
         mlx_array_data = Wrapper.mlx_array_data_int64
-        # TODO generate wrapper on system with HAS_FLOAT16
+    elseif T == Float16
+        mlx_array_data = Wrapper.mlx_array_data_float16
     elseif T == Float32
         mlx_array_data = Wrapper.mlx_array_data_float32
-        # TODO generate wrapper on system with HAS_BFLOAT16
+    elseif T == Core.BFloat16
+        mlx_array_data = Wrapper.mlx_array_data_bfloat16
     elseif T == ComplexF32
         mlx_array_data = Wrapper.mlx_array_data_complex64
     else
