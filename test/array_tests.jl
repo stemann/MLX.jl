@@ -16,6 +16,9 @@ using Test
         Float32,
         ComplexF32,
     )
+    @static if VERSION >= v"1.11"
+        element_types = (element_types..., Core.BFloat16)
+    end
     for T in element_types, N in (0, 1, 2, 3)
         @testset "Array{$T, $N}" begin
             array = repeat([T(1)], N)
