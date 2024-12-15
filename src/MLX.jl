@@ -1,9 +1,10 @@
 module MLX
 
-export MLXException
+export MLXArray, MLXMatrix, MLXVector, MLXVecOrMat, MLXException
 
 include(joinpath(@__DIR__, "Wrapper.jl"))
 
+include(joinpath(@__DIR__, "array.jl"))
 include(joinpath(@__DIR__, "device.jl"))
 include(joinpath(@__DIR__, "error_handling.jl"))
 include(joinpath(@__DIR__, "metal.jl"))
