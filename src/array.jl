@@ -9,6 +9,11 @@ mutable struct MLXArray{T, N} <: AbstractArray{T, N}
 end
 
 function Base.convert(::Type{Wrapper.mlx_dtype}, type::Type{<:Number})
+    @static if VERSION >= v"1.11"
+        if type == Core.BFloat16
+            return Wrapper.MLX_BFLOAT16
+        end
+    end
     if type == Bool
         return Wrapper.MLX_BOOL
     elseif type == UInt8
@@ -31,7 +36,6 @@ function Base.convert(::Type{Wrapper.mlx_dtype}, type::Type{<:Number})
         return Wrapper.MLX_FLOAT16
     elseif type == Float32
         return Wrapper.MLX_FLOAT32
-        # TODO Handle Wrapper.MLX_BFLOAT16
     elseif type == ComplexF32
         return Wrapper.MLX_COMPLEX64 # MLX_COMPLEX64 is a complex of Float32
     else

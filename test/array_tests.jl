@@ -19,6 +19,9 @@ using Test
         ComplexF32,
     )
     array_sizes = [(), (1,), (2,), (1, 1), (2, 1), (2, 2), (1, 1, 1)]
+    @static if VERSION >= v"1.11"
+        element_types = (element_types..., Core.BFloat16)
+    end
     for T in element_types, array_size in array_sizes
         N = length(array_size)
         @testset "$MLXArray{$T, $N} $array_size" begin
