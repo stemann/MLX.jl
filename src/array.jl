@@ -9,6 +9,11 @@ mutable struct MLXArray{T, N} <: AbstractArray{T, N}
 end
 
 function Base.convert(::Type{Wrapper.mlx_dtype}, type::Type{<:Number})
+    @static if VERSION >= v"1.11"
+        if type == Core.BFloat16
+            return Wrapper.MLX_BFLOAT16
+        end
+    end
     if type == Bool
         return Wrapper.MLX_BOOL
     elseif type == UInt8
@@ -31,7 +36,6 @@ function Base.convert(::Type{Wrapper.mlx_dtype}, type::Type{<:Number})
         return Wrapper.MLX_FLOAT16
     elseif type == Float32
         return Wrapper.MLX_FLOAT32
-        # TODO Handle Wrapper.MLX_BFLOAT16
     elseif type == ComplexF32
         return Wrapper.MLX_COMPLEX64 # MLX_COMPLEX64 is a complex of Float32
     else
@@ -120,10 +124,12 @@ function Base.unsafe_convert(::Type{Ptr{T}}, array::MLXArray{T, N}) where {T, N}
         mlx_array_data = Wrapper.mlx_array_data_int32
     elseif T == Int64
         mlx_array_data = Wrapper.mlx_array_data_int64
-        # TODO generate wrapper on system with HAS_FLOAT16
+    elseif T == Float16
+        mlx_array_data = Wrapper.mlx_array_data_float16
     elseif T == Float32
         mlx_array_data = Wrapper.mlx_array_data_float32
-        # TODO generate wrapper on system with HAS_BFLOAT16
+    elseif T == Core.BFloat16
+        mlx_array_data = Wrapper.mlx_array_data_bfloat16
     elseif T == ComplexF32
         mlx_array_data = Wrapper.mlx_array_data_complex64
     else

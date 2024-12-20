@@ -176,6 +176,14 @@ function mlx_array_item_complex64(res, arr)
     ccall((:mlx_array_item_complex64, libmlxc), Cint, (Ptr{ComplexF32}, mlx_array), res, arr)
 end
 
+function mlx_array_item_float16(res, arr)
+    ccall((:mlx_array_item_float16, libmlxc), Cint, (Ptr{Cint}, mlx_array), res, arr)
+end
+
+function mlx_array_item_bfloat16(res, arr)
+    ccall((:mlx_array_item_bfloat16, libmlxc), Cint, (Ptr{Cint}, mlx_array), res, arr)
+end
+
 function mlx_array_data_bool(arr)
     ccall((:mlx_array_data_bool, libmlxc), Ptr{Bool}, (mlx_array,), arr)
 end
@@ -218,6 +226,14 @@ end
 
 function mlx_array_data_complex64(arr)
     ccall((:mlx_array_data_complex64, libmlxc), Ptr{ComplexF32}, (mlx_array,), arr)
+end
+
+function mlx_array_data_float16(arr)
+    ccall((:mlx_array_data_float16, libmlxc), Ptr{Cint}, (mlx_array,), arr)
+end
+
+function mlx_array_data_bfloat16(arr)
+    ccall((:mlx_array_data_bfloat16, libmlxc), Ptr{Cint}, (mlx_array,), arr)
 end
 
 struct mlx_closure_
