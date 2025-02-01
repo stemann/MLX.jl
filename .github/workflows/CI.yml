@@ -52,10 +52,9 @@ jobs:
       - uses: julia-actions/cache@v2
       - uses: julia-actions/julia-buildpkg@v1
       - run: |
-          echo $(which julia)
-          ls -la $(dirname $(which julia))
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            export LBT_DEFAULT_LIBS=$(dirname $(which julia))/libopenblas64_.dll
+            export LBT_DEFAULT_LIBS=$(julia --project --eval 'using Pkg; Pkg.add("OpenBLAS32_jll"); import OpenBLAS32_jll; print(OpenBLAS32_jll.libopenblas)')
+            echo $LBT_DEFAULT_LIBS
           fi
           julia --project --eval 'import Pkg; Pkg.test()'
         shell: bash
