@@ -6,10 +6,12 @@ version = "0.1.0"
 [deps]
 CEnum = "fa961155-64e5-5f13-b03f-caf6b980ea82"
 MLX_C_jll = "6073304d-8c11-559f-8a83-5ce24a08dcab"
+OpenBLAS32 = "51095b67-9e93-468d-a683-508b52f74e81"
 
 [compat]
 CEnum = "0.5.0"
 MLX_C_jll = "0.1.0"
+OpenBLAS32 = "0.1.0"
 julia = "1"
 
 [extras]

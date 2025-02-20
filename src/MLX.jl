@@ -1,5 +1,7 @@
 module MLX
 
+using OpenBLAS32
+
 export MLXArray, MLXException, MLXMatrix, MLXVecOrMat, MLXVector
 
 include(joinpath(@__DIR__, "Wrapper.jl"))
