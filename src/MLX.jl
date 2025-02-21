@@ -1,5 +1,6 @@
 module MLX
 
+using dlfcn_win32_jll
 using OpenBLAS32
 
 export MLXArray, MLXException, MLXMatrix, MLXVecOrMat, MLXVector
