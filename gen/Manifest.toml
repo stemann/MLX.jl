@@ -1,6 +1,6 @@
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.11.2"
+julia_version = "1.11.4"
 manifest_format = "2.0"
 project_hash = "37473366ce9efc350abee68ac58321ade3ac8041"
 
@@ -52,11 +52,22 @@ version = "1.6.0"
 uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
 version = "1.11.0"
 
+[[deps.Hwloc_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl"]
+git-tree-sha1 = "f93a9ce66cd89c9ba7a4695a47fd93b4c6bc59fa"
+uuid = "e33a78d0-f292-5ffc-b300-72abe9b543c8"
+version = "2.12.0+0"
+
 [[deps.JLLWrappers]]
 deps = ["Artifacts", "Preferences"]
-git-tree-sha1 = "be3dc50a92e5a386872a493a10050136d4703f9b"
+git-tree-sha1 = "a007feb38b422fbdab534406aeca1b86823cb4d6"
 uuid = "692b3bcd-3c85-4b1f-b108-f13ce0eb3210"
-version = "1.6.1"
+version = "1.7.0"
+
+[[deps.LazyArtifacts]]
+deps = ["Artifacts", "Pkg"]
+uuid = "4af54fe1-eca0-43a8-85a7-787d91b784e3"
+version = "1.11.0"
 
 [[deps.LibCURL]]
 deps = ["LibCURL_jll", "MozillaCACerts_jll"]
@@ -93,15 +104,21 @@ version = "1.11.0"
 
 [[deps.MLX_C_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "MLX_jll"]
-git-tree-sha1 = "9a0978dc21bc1ad2b95e1d36523138baed2d9176"
+git-tree-sha1 = "e03310c371a558583c036e9318ef0ba020b8631a"
 uuid = "6073304d-8c11-559f-8a83-5ce24a08dcab"
-version = "0.1.0+0"
+version = "0.1.1+0"
 
 [[deps.MLX_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl", "OpenBLAS32_jll", "dlfcn_win32_jll", "libblastrampoline_jll"]
-git-tree-sha1 = "93c1ea8fc13253c8bf0715bd583456fe0e2fa15e"
+deps = ["Artifacts", "JLLWrappers", "Libdl", "OpenBLAS32_jll", "OpenMPI_jll", "libblastrampoline_jll"]
+git-tree-sha1 = "14c0fa29500826b2e7dec8ff38ee1c9592d8f73c"
 uuid = "f64cf55a-5a53-5b8c-8e0c-ce6c538bc415"
-version = "0.21.0+0"
+version = "0.23.1+0"
+
+[[deps.MPIPreferences]]
+deps = ["Libdl", "Preferences"]
+git-tree-sha1 = "c105fe467859e7f6e9a852cb15cb4301126fac07"
+uuid = "3da0fdf6-3ccc-4f1b-acd9-58baa6c99267"
+version = "0.1.11"
 
 [[deps.Markdown]]
 deps = ["Base64"]
@@ -123,9 +140,15 @@ version = "1.2.0"
 
 [[deps.OpenBLAS32_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "dd806c813429ff09878ea3eeb317818f3ca02871"
+git-tree-sha1 = "ece4587683695fe4c5f20e990da0ed7e83c351e7"
 uuid = "656ef2d0-ae68-5445-9ca0-591084a874a2"
-version = "0.3.28+3"
+version = "0.3.29+0"
+
+[[deps.OpenMPI_jll]]
+deps = ["Artifacts", "CompilerSupportLibraries_jll", "Hwloc_jll", "JLLWrappers", "LazyArtifacts", "Libdl", "MPIPreferences", "TOML", "Zlib_jll"]
+git-tree-sha1 = "da913f03f17b449951e0461da960229d4a3d1a8c"
+uuid = "fe0851c0-eecd-5654-98d4-656369965a5c"
+version = "5.0.7+1"
 
 [[deps.Pkg]]
 deps = ["Artifacts", "Dates", "Downloads", "FileWatching", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "Random", "SHA", "TOML", "Tar", "UUIDs", "p7zip_jll"]
@@ -181,12 +204,6 @@ version = "1.11.0"
 deps = ["Libdl"]
 uuid = "83775a58-1f1d-513f-b197-d71354ab007a"
 version = "1.2.13+1"
-
-[[deps.dlfcn_win32_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "2315bcd609c67ab5d19be9efaca4b7f88c3d2140"
-uuid = "c4b69c83-5512-53e3-94e6-de98773c479f"
-version = "1.3.1+0"
 
 [[deps.libLLVM_jll]]
 deps = ["Artifacts", "Libdl"]

@@ -21,8 +21,9 @@ end
 
 function Base.getproperty(device::Device, name::Symbol)
     if name == :type
-        mlx_device_type = Wrapper.mlx_device_get_type(device.mlx_device)
-        return DeviceType(UInt32(mlx_device_type))
+        mlx_device_type = Ref{Wrapper.mlx_device_type}()
+        Wrapper.mlx_device_get_type(mlx_device_type, device.mlx_device)
+        return DeviceType(UInt32(mlx_device_type[]))
     end
     return getfield(device, name)
 end
