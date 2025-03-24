@@ -20,7 +20,11 @@ function Device(; device_type = DeviceTypeCPU, index::Int = 0)
 end
 
 function Base.getproperty(device::Device, name::Symbol)
-    if name == :type
+    if name == :index
+        index = Ref(Cint(-1))
+        Wrapper.mlx_device_get_index(index, device.mlx_device)
+        return Int(index[])
+    elseif name == :type
         mlx_device_type = Ref{Wrapper.mlx_device_type}()
         Wrapper.mlx_device_get_type(mlx_device_type, device.mlx_device)
         return DeviceType(UInt32(mlx_device_type[]))
@@ -28,22 +32,19 @@ function Base.getproperty(device::Device, name::Symbol)
     return getfield(device, name)
 end
 
-Base.propertynames(::Device) = (:type, fieldnames(Device)...)
+Base.propertynames(::Device) = (:index, :type, fieldnames(Device)...)
 
-function Base.setproperty!(device::Device, name::Symbol, value)
-    if name == :type
-        throw(ArgumentError("Cannot set device type"))
+function Base.setproperty!(::Device, name::Symbol, value)
+    if name == :index || name == :type
+        throw(ArgumentError("Cannot set device $name"))
     end
     throw(ArgumentError("Field $name should not be set"))
 end
 
-# TODO This should return, e.g., "Device(; device_type = DeviceTypeCPU, index = 0)", and not "Device(cpu, 0)" (the result from mlx_device_tostring)
+Base.:(==)(a::Device, b::Device) = Wrapper.mlx_device_equal(a.mlx_device, b.mlx_device) == 1 # TODO mlx_device_equal should return Bool and not Cint
+
 function Base.show(io::IO, device::Device)
-    mlx_str = Ref(Wrapper.mlx_string_new())
-    Wrapper.mlx_device_tostring(mlx_str, device.mlx_device)
-    str = unsafe_string(Wrapper.mlx_string_data(mlx_str[]))
-    Wrapper.mlx_string_free(mlx_str[])
-    print(io, str)
+    print(io, "MLX.Device(; device_type = MLX.$(device.type), index = $(device.index))")
     return nothing
 end
 

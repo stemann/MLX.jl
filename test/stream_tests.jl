@@ -9,11 +9,13 @@ using Test
     @testset "properties" begin
         stream = MLX.Stream(default_device)
 
-        @test propertynames(stream) == (:device, fieldnames(MLX.Stream)...)
+        @test propertynames(stream) == (:device, :index, fieldnames(MLX.Stream)...)
 
-        @test stream.device isa MLX.Device # TODO should test equality, but equality is not implemented for MLX.Device
+        @test stream.device == default_device
+        @test stream.index isa Int # TODO should test equality, but the Stream constructor does not support specifying the stream index
 
         @test_throws ArgumentError stream.device = MLX.Device()
+        @test_throws ArgumentError stream.index = 0
 
         null_stream = MLX.Wrapper.mlx_stream_new()
         @test_throws ArgumentError stream.mlx_stream = null_stream
@@ -26,9 +28,7 @@ using Test
     end
     @testset "show" begin
         stream = MLX.Stream(default_device)
-        stream_str = repr(stream)
-        @test startswith(stream_str, "Stream($(repr(stream.device)), ") &&
-            endswith(stream_str, ")")
+        @test repr(stream) == "MLX.Stream($(repr(stream.device)); index = $(stream.index))"
     end
     @testset "synchronize!" begin
         stream = MLX.Stream(default_device)

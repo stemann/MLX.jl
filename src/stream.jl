@@ -18,15 +18,19 @@ function Base.getproperty(stream::Stream, name::Symbol)
         mlx_device = Ref(Wrapper.mlx_device_new())
         Wrapper.mlx_stream_get_device(mlx_device, stream.mlx_stream)
         return Device(mlx_device[])
+    elseif name == :index
+        index = Ref(Cint(-1))
+        Wrapper.mlx_stream_get_index(index, stream.mlx_stream)
+        return Int(index[])
     end
     return getfield(stream, name)
 end
 
-Base.propertynames(::Stream) = (:device, fieldnames(Stream)...)
+Base.propertynames(::Stream) = (:device, :index, fieldnames(Stream)...)
 
 function Base.setproperty!(::Stream, name::Symbol, _)
-    if name == :device
-        throw(ArgumentError("Cannot set device"))
+    if name == :device || name == :index
+        throw(ArgumentError("Cannot set stream $name"))
     end
     throw(ArgumentError("Field $name should not be set"))
 end
@@ -34,11 +38,7 @@ end
 Base.:(==)(a::Stream, b::Stream) = Wrapper.mlx_stream_equal(a.mlx_stream, b.mlx_stream)
 
 function Base.show(io::IO, stream::Stream)
-    mlx_str = Ref(Wrapper.mlx_string_new())
-    Wrapper.mlx_stream_tostring(mlx_str, stream.mlx_stream)
-    str = unsafe_string(Wrapper.mlx_string_data(mlx_str[]))
-    Wrapper.mlx_string_free(mlx_str[])
-    print(io, str)
+    print(io, "MLX.Stream($(stream.device); index = $(stream.index))")
     return nothing
 end
 
