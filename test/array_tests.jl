@@ -1,7 +1,21 @@
+@static if VERSION < v"1.11"
+    using ScopedValues
+else
+    using Base.ScopedValues
+end
+
 using MLX
+using Random
 using Test
 
 @testset "MLXArray" begin
+    Random.seed!(42)
+
+    device_types = [MLX.DeviceTypeCPU]
+    if MLX.metal_is_available()
+        push!(device_types, MLX.DeviceTypeGPU)
+    end
+
     @test IndexStyle(MLXArray) == IndexLinear()
 
     array_sizes = [(), (1,), (2,), (1, 1), (2, 1), (3, 2), (4, 3, 2)]
@@ -30,6 +44,22 @@ using Test
                     @test getindex(mlx_array, 1) == T(1)
                     array[1] = T(1)
                     @test setindex!(mlx_array, T(1), 1) == array
+                end
+
+                @testset "similar(::$MLXArray{$T, $N}), array_size=$array_size" begin
+                    for device_type in device_types
+                        if T ∉ MLX.supported_number_types(device_type)
+                            continue
+                        end
+                        @testset "similar(::$MLXArray{$T, $N}), with array_size=$array_size, $device_type" begin
+                            with(MLX.device => MLX.Device(; device_type)) do
+                                similar_mlx_array = similar(mlx_array)
+                                @test typeof(similar_mlx_array) == typeof(mlx_array)
+                                @test size(similar_mlx_array) == size(mlx_array)
+                                @test similar_mlx_array !== mlx_array
+                            end
+                        end
+                    end
                 end
             end
         end
@@ -62,7 +92,28 @@ using Test
             @test Base.elsize(MLXArray{T, 0}) == Base.elsize(Array{T, 0})
         end
     end
+
     @testset "Unsupported Number types" begin
         @test_throws ArgumentError convert(MLX.Wrapper.mlx_dtype, Rational{Int})
+    end
+
+    @testset "Broadcasting interface" begin
+        for device_type in device_types,
+            T in MLX.supported_number_types(device_type),
+            array_size in array_sizes
+
+            N = length(array_size)
+            @testset "broadcast(identity, ::$MLXArray{$T, $N}), array_size=$array_size, $device_type" begin
+                array = rand(T, array_size)
+                mlx_array = MLXArray(array)
+
+                with(MLX.device => MLX.Device(; device_type)) do
+                    result = identity.(mlx_array)
+                    @test result isa MLXArray
+                    @test result == mlx_array
+                    @test result !== mlx_array
+                end
+            end
+        end
     end
 end
