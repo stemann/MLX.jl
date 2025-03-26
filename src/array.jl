@@ -88,6 +88,13 @@ function Base.setindex!(array::MLXArray{T, N}, v::T, i::Int) where {T, N}
     return array
 end
 
+function Base.similar(array::MLXArray{T, N}, ::Type{T}, ::Dims{N}) where {T, N}
+    stream = get_stream()
+    result_ref = Ref(Wrapper.mlx_array_new())
+    Wrapper.mlx_zeros_like(result_ref, array.mlx_array, stream.mlx_stream)
+    return MLXArray{T, N}(result_ref[])
+end
+
 # Strided array interface, cf. https://docs.julialang.org/en/v1/manual/interfaces/#man-interface-strided-arrays
 
 function Base.strides(array::MLXArray)
@@ -155,4 +162,22 @@ function Base.unsafe_wrap(array::MLXArray{T, N}) where {T, N}
     else
         PermutedDimsArray(wrapped_array, reverse(1:ndims(array)))
     end
+end
+
+# Broadcasting interface, cf. https://docs.julialang.org/en/v1/manual/interfaces/#man-interfaces-broadcasting
+
+Base.BroadcastStyle(::Type{<:MLXArray}) = Broadcast.ArrayStyle{MLXArray}()
+
+function Base.similar(
+    bc::Broadcast.Broadcasted{Broadcast.ArrayStyle{MLXArray}}, ::Type{TElement}
+) where {TElement}
+    first_mlx_array(bc::Broadcast.Broadcasted) = first_mlx_array(bc.args)
+    function first_mlx_array(args::Tuple)
+        return first_mlx_array(first_mlx_array(args[1]), Base.tail(args))
+    end
+    first_mlx_array(x) = x
+    first_mlx_array(::Tuple{}) = nothing
+    first_mlx_array(a::MLXArray, _) = a
+    first_mlx_array(::Any, rest) = first_mlx_array(rest)
+    return similar(first_mlx_array(bc))
 end
