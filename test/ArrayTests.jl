@@ -110,6 +110,104 @@ using .TestUtils
         array = BitArray(rand(Bool, array_size))
         @test to_mlx(array) == array
     end
+
+    @testset "Broadcasting interface" begin
+        # Test cases with the arguments after the MLXArray, and their Array counterparts
+        function test_cases(T, array_size)
+            op = T == Bool ? xor : +
+            scalar = T == Bool ? true : T(2)
+            other = rand(T, array_size)
+            return [
+                (fn = identity, args = (), base_array_args = ()),
+                (fn = op, args = (scalar,), base_array_args = (scalar,)),
+                (fn = op, args = (MLXArray(other),), base_array_args = (other,)),
+                (fn = op, args = (MLXNumber(scalar),), base_array_args = (scalar,)),
+            ]
+        end
+        testset_foreach("broadcast") do T, array_size
+            N = length(array_size)
+            compare_op = T <: Integer ? (==) : ≈
+            for test_case in test_cases(T, array_size)
+                arg_types = join(map(arg -> ", ::$(typeof(arg))", test_case.args))
+                @testset "broadcast($(repr(test_case.fn)), ::$MLXArray{$T, $N}$arg_types)" begin
+                    array = rand(T, array_size)
+                    mlx_array = MLXArray(array)
+                    actual = broadcast(test_case.fn, mlx_array, test_case.args...)
+                    expected = broadcast(test_case.fn, array, test_case.base_array_args...)
+                    if N == 0
+                        @test actual isa MLXNumber{T}
+                        @test compare_op(T(actual), expected)
+                    else
+                        @test actual isa MLXArray{T, N}
+                        @test compare_op(actual, expected)
+                    end
+                end
+            end
+        end
+
+        real_types(device_type) =
+            filter(T -> T <: Real, MLX.supported_number_types(device_type))
+        testset_foreach(
+            "broadcast changing element type"; element_types = real_types
+        ) do T, array_size
+            N = length(array_size)
+            array = rand(T, array_size)
+            mlx_array = MLXArray(array)
+            actual = mlx_array .> zero(T)
+            expected = array .> zero(T)
+            if N == 0
+                @test actual isa MLXNumber{Bool}
+            else
+                @test actual isa MLXArray{Bool, N}
+            end
+            @test actual == expected
+        end
+
+        non_bool_types(device_type) =
+            filter(T -> T != Bool, MLX.supported_number_types(device_type))
+        testset_foreach_type(
+            "broadcast changing shape"; element_types = non_bool_types
+        ) do T
+            compare_op = T <: Integer ? (==) : ≈
+            vector = rand(T, 2)
+            matrix = rand(T, 2, 3)
+            actual = MLXVector(vector) .+ MLXMatrix(matrix)
+            expected = vector .+ matrix
+            @test actual isa MLXArray{T, 2}
+            @test size(actual) == size(expected)
+            @test compare_op(actual, expected)
+        end
+
+        # Base's array functions that broadcast keep 0-dim arrays, unlike broadcasting itself
+        testset_foreach(
+            "0-dim array functions that broadcast";
+            element_types = non_bool_types,
+            array_sizes = [()],
+        ) do T, array_size
+            N = length(array_size)
+            compare_op = T <: Integer ? (==) : ≈
+            fns = [
+                "-A" => (A, B) -> -A,
+                "A + B" => +,
+                "A - B" => -,
+                "2 * A" => (A, B) -> T(2) * A,
+                "A * 2" => (A, B) -> A * T(2),
+            ]
+            if !(T <: Integer)
+                push!(fns, "A / 2" => (A, B) -> A / T(2), "2 \\ A" => (A, B) -> T(2) \ A)
+            end
+            for (name, fn) in fns
+                @testset "$name, ::$MLXArray{$T, $N}" begin
+                    array = rand(T, array_size)
+                    other = rand(T, array_size)
+                    actual = fn(MLXArray(array), MLXArray(other))
+                    expected = fn(array, other)
+                    @test actual isa MLXArray{T, N}
+                    @test compare_op(actual, expected)
+                end
+            end
+        end
+    end
 end
 
 end

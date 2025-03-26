@@ -63,3 +63,16 @@ function Base.show(io::IO, x::MLXNumber)
     show(io, x.array[])
     return print(io, ")")
 end
+
+# Broadcasting interface, cf. https://docs.julialang.org/en/v1/manual/interfaces/#man-interfaces-broadcasting
+
+# Broadcasts as a 0-dimensional `MLXArray`
+Base.broadcastable(x::MLXNumber) = x.array
+
+# Keep 0-dim results of `Base.Broadcast.broadcast_preserving_zero_d`, e.g. for `-A` and `A + B`,
+# as 0-dim arrays, as for `Array`, cf. https://github.com/JuliaLang/julia/pull/32122
+function Base.similar(
+    bc::Broadcast.Broadcasted{Broadcast.ArrayStyle{MLXArray}}, ::Type{MLXNumber{T}}
+) where {T}
+    return similar(bc, T)
+end
