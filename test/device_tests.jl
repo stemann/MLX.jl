@@ -1,3 +1,8 @@
+@static if VERSION < v"1.11"
+    using ScopedValues
+else
+    using Base.ScopedValues
+end
 using MLX
 using Test
 
@@ -53,5 +58,29 @@ using Test
         device = MLX.Device()
         @test MLX.set_default_device(device) === nothing
         @test repr(MLX.default_device()) == repr(device)
+    end
+    @testset "ScopedValue device" begin
+        @testset "device" begin
+            device = MLX.Device()
+            @assert isnothing(MLX.device[])
+            with(MLX.device => device) do
+                @test MLX.device[] == device
+            end
+        end
+        @testset "get_device" begin
+            default_device = MLX.default_device()
+            other_device = MLX.Device(;
+                device_type = MLX.DeviceTypeCPU, index = default_device.index + 1
+            )
+            @test MLX.get_device() == default_device
+            with(MLX.device => other_device) do
+                @test MLX.get_device() == other_device
+            end
+            # TODO Crash if creating MLX.Stream(other_device): libc++abi: terminating due to uncaught exception of type std::runtime_error: [metal::make_synchronize_task] Cannot synchronize GPU without metal backend
+            # other_stream = MLX.Stream(other_device)
+            # with(MLX.stream => other_stream) do
+            #     @test MLX.get_device() == other_device
+            # end
+        end
     end
 end

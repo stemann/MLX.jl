@@ -58,3 +58,17 @@ function set_default_device(device::Device)
     Wrapper.mlx_set_default_device(device.mlx_device)
     return nothing
 end
+
+const device = ScopedValue{Union{Device, Nothing}}(nothing)
+
+function get_device()::Device
+    scoped_device = device[]
+    if isnothing(scoped_device)
+        scoped_stream = stream[]
+        if isnothing(scoped_stream)
+            return default_device()
+        end
+        return scoped_stream.device
+    end
+    return scoped_device
+end

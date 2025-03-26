@@ -67,3 +67,13 @@ function default_gpu_stream()
     mlx_stream = Wrapper.mlx_default_gpu_stream_new()
     return Stream(mlx_stream)
 end
+
+const stream = ScopedValue{Union{Stream, Nothing}}(nothing)
+
+function get_stream()::Stream
+    scoped_stream = stream[]
+    if isnothing(scoped_stream)
+        return default_stream(get_device())
+    end
+    return scoped_stream
+end
