@@ -158,3 +158,23 @@ function Base.unsafe_wrap(array::MLXArray{T, N}) where {T, N}
         return PermutedDimsArray(wrapped_array, reverse(1:ndims(array)))
     end
 end
+
+# Broadcasting interface, cf. https://docs.julialang.org/en/v1/manual/interfaces/#man-interfaces-broadcasting
+
+Base.BroadcastStyle(::Type{<:MLXArray}) = Broadcast.ArrayStyle{MLXArray}()
+
+function Base.similar(
+    bc::Broadcast.Broadcasted{Broadcast.ArrayStyle{MLXArray}}, ::Type{T}
+) where {T}
+    return similar(MLXArray{T}, axes(bc))
+end
+
+function Base.Broadcast.materialize(
+    bc::Broadcast.Broadcasted{Broadcast.ArrayStyle{MLXArray}}
+)
+    result = copy(Broadcast.instantiate(bc))
+    if iszero(ndims(result)) # Drop 0-dim results to scalars, as for Array, cf. https://github.com/JuliaLang/julia/issues/28866
+        return MLXNumber(result)
+    end
+    return result
+end
