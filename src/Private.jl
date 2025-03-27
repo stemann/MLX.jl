@@ -18,7 +18,7 @@ function get_unary_ops()
         :acos => (
             mlx_fn = Wrapper.mlx_arccos,
             TIn = RealExceptBool,
-            output_type = (::Type) -> Float32, # TODO: Float64 unsupported by MLX 0.1.1
+            output_type = (::Type) -> Float32, # TODO: Float64 unsupported by MLX C 0.1.1
             preserves_type = false,
             normalize = (a, TIn) -> TIn.(a ./ abs.(a)),
         ),
@@ -27,7 +27,7 @@ function get_unary_ops()
             TIn = AbstractFloat,
             output_type = return_input_type,
             preserves_type = true,
-            normalize = (a, TIn) -> a,
+            normalize = (a, TIn) -> a .+ 1,
         ),
         :asin => (
             mlx_fn = Wrapper.mlx_arcsin,
@@ -46,8 +46,8 @@ function get_unary_ops()
         :atan => (
             mlx_fn = Wrapper.mlx_arctan,
             TIn = Real,
-            output_type = return_input_type,
-            preserves_type = true,
+            output_type = (::Type) -> Float32, # TODO: Float64 unsupported by MLX C 0.1.1
+            preserves_type = false,
             normalize = (a, TIn) -> a,
         ),
         :atanh => (
