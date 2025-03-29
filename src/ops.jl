@@ -1,4 +1,4 @@
-for (fn, fn_def) in Private.get_unary_ops()
+for (fn, fn_def) in Private.get_unary_scalar_ops()
     TOut = fn_def.output_type(fn_def.TIn)
     @eval function Broadcast.broadcasted(
         ::Broadcast.ArrayStyle{MLXArray}, ::typeof($fn), a::MLXArray{T, N}

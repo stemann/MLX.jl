@@ -29,7 +29,7 @@ using Test
         (2, 2),
         (1, 1, 1),
     ]
-    for (fn, fn_def) in MLX.Private.get_unary_ops()
+    for (fn, fn_def) in MLX.Private.get_unary_scalar_ops()
     @testset "$fn" begin
     for T in element_types,
         array_size in array_sizes

@@ -5,7 +5,20 @@ using ..Wrapper
 function return_input_type(::Type{TIn}) where {TIn}
     return TIn
 end
-function get_unary_ops()
+
+function get_unary_array_ops()
+    return Dict(
+        :sortperm => (
+            mlx_fn = Wrapper.mlx_argsort_all, # TODO check if this is correct
+            TIn = Number,
+            output_type = return_input_type,
+            preserves_type = true,
+            normalize = (a, TIn) -> a,
+        ),
+    )
+end
+
+function get_unary_scalar_ops()
     RealExceptBool = Union{AbstractFloat, Signed, Unsigned}
     return Dict(
         :abs => (
@@ -56,13 +69,6 @@ function get_unary_ops()
             output_type = (::Type) -> Float32, # TODO: Float64 unsupported by MLX C 0.1.1
             preserves_type = false,
             normalize = (a, TIn) -> floor.(TIn, a ./ maximum(a)),
-        ),
-        :sortperm => (
-            mlx_fn = Wrapper.mlx_argsort_all, # TODO check if this is correct
-            TIn = Number,
-            output_type = return_input_type,
-            preserves_type = true,
-            normalize = (a, TIn) -> a,
         ),
         # mlx_atleast_1d
         # mlx_atleast_2d
