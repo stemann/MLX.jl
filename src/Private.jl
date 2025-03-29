@@ -96,23 +96,23 @@ function get_unary_scalar_ops()
         ),
         :cos => (
             mlx_fn = Wrapper.mlx_cos,
-            TIn = Number,
-            output_type = return_input_type,
-            preserves_type = true,
-            normalize = (a, TIn) -> a,
+            TIn = AbstractFloat, # in testing, cos differs from mlx_cos wrt. Signed, Unsigned, Complex{<:AbstractFloat}, Bool fails: conversion to pointer not defined for BitArray
+            output_type = (::Type) -> Float32, # TODO: Float64 unsupported by MLX C 0.1.1
+            preserves_type = false,
+            normalize = (a, TIn) -> round.(TIn, map(x -> iszero(x % π) ? x + eps(Float32) : x, a)),
         ),
         :cosh => (
             mlx_fn = Wrapper.mlx_cosh,
-            TIn = Number,
-            output_type = return_input_type,
-            preserves_type = true,
+            TIn = Real, # testing fails for cosh wrt. Complex{<:AbstractFloat}
+            output_type = (::Type) -> Float32, # TODO: Float64 unsupported by MLX C 0.1.1
+            preserves_type = false,
             normalize = (a, TIn) -> a,
         ),
         :rad2deg => (
             mlx_fn = Wrapper.mlx_degrees,
-            TIn = Number,
-            output_type = return_input_type,
-            preserves_type = true,
+            TIn = Real, # testing fails for rad2deg wrt. Complex{<:AbstractFloat}
+            output_type = (::Type) -> Float32, # TODO: Float64 unsupported by MLX C 0.1.1
+            preserves_type = false,
             normalize = (a, TIn) -> a,
         ),
         # mlx_erf
