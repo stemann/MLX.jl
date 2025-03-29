@@ -6,6 +6,10 @@ function return_input_type(::Type{TIn}) where {TIn}
     return TIn
 end
 
+function return_float_type(::Type{TIn}) where {TIn}
+    return TIn <: Complex{<:AbstractFloat} ? TIn : Float32 # TODO: Float64 unsupported by MLX C 0.1.1
+end
+
 function get_unary_array_ops()
     return Dict(
         :sortperm => (
@@ -38,7 +42,7 @@ function get_unary_scalar_ops()
         :acos => (
             mlx_fn = Wrapper.mlx_arccos,
             TIn = RealExceptBool, # in testing, acos differs from mlx_arccos wrt. Bool, Complex{<:AbstractFloat}
-            output_type = (::Type) -> Float32, # TODO: Float64 unsupported by MLX C 0.1.1
+            output_type = return_float_type,
             preserves_type = false,
             normalize = (a, TIn) -> floor.(TIn, a ./ maximum(a)),
         ),
@@ -66,14 +70,14 @@ function get_unary_scalar_ops()
         :atan => (
             mlx_fn = Wrapper.mlx_arctan,
             TIn = Real, # testing fails for atan wrt. Complex{<:AbstractFloat}
-            output_type = (::Type) -> Float32, # TODO: Float64 unsupported by MLX C 0.1.1
+            output_type = return_float_type,
             preserves_type = false,
             normalize = (a, TIn) -> a,
         ),
         :atanh => (
             mlx_fn = Wrapper.mlx_arctanh,
             TIn = AbstractFloat, # in testing, atanh differs from mlx_arctanh wrt. Integer, normalize fails for Complex{<:AbstractFloat}
-            output_type = (::Type) -> Float32, # TODO: Float64 unsupported by MLX C 0.1.1
+            output_type = return_float_type,
             preserves_type = false,
             normalize = (a, TIn) -> floor.(TIn, a ./ maximum(a)),
         ),
@@ -97,21 +101,21 @@ function get_unary_scalar_ops()
         :cos => (
             mlx_fn = Wrapper.mlx_cos,
             TIn = AbstractFloat, # in testing, cos differs from mlx_cos wrt. Signed, Unsigned, Complex{<:AbstractFloat}, Bool fails: conversion to pointer not defined for BitArray
-            output_type = (::Type) -> Float32, # TODO: Float64 unsupported by MLX C 0.1.1
+            output_type = return_float_type,
             preserves_type = false,
             normalize = (a, TIn) -> round.(TIn, map(x -> iszero(x % π) ? x + eps(Float32) : x, a)),
         ),
         :cosh => (
             mlx_fn = Wrapper.mlx_cosh,
             TIn = Real, # testing fails for cosh wrt. Complex{<:AbstractFloat}
-            output_type = (::Type) -> Float32, # TODO: Float64 unsupported by MLX C 0.1.1
+            output_type = return_float_type,
             preserves_type = false,
             normalize = (a, TIn) -> a,
         ),
         :rad2deg => (
             mlx_fn = Wrapper.mlx_degrees,
             TIn = Real, # testing fails for rad2deg wrt. Complex{<:AbstractFloat}
-            output_type = (::Type) -> Float32, # TODO: Float64 unsupported by MLX C 0.1.1
+            output_type = return_float_type,
             preserves_type = false,
             normalize = (a, TIn) -> a,
         ),
@@ -119,9 +123,9 @@ function get_unary_scalar_ops()
         # mlx_erfinv
         :exp => (
             mlx_fn = Wrapper.mlx_exp,
-            TIn = Number,
-            output_type = return_input_type,
-            preserves_type = true,
+            TIn = Real, # testing fails for exp wrt. Complex{<:AbstractFloat}. TODO: Needs broadcast across Float32 and ComplexF32: `copyto!(dest::MLXArray{Float32, 3}, bc::Base.Broadcast.Broadcasted{Nothing, Tuple{Base.OneTo{Int64}, Base.OneTo{Int64}, Base.OneTo{Int64}}, typeof(-), Tuple{MLXArray{Float32, 3}, Array{ComplexF32, 3}}})`
+            output_type = return_float_type,
+            preserves_type = false,
             normalize = (a, TIn) -> a,
         ),
         :expm1 => (
