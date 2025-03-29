@@ -130,21 +130,21 @@ function get_unary_scalar_ops()
         ),
         :expm1 => (
             mlx_fn = Wrapper.mlx_expm1,
-            TIn = Number,
-            output_type = return_input_type,
-            preserves_type = true,
+            TIn = Real, # testing fails for expm1 wrt. Complex{<:AbstractFloat}. TODO: Needs broadcast across Float32 and ComplexF32
+            output_type = return_float_type,
+            preserves_type = false,
             normalize = (a, TIn) -> a,
         ),
         :floor => (
             mlx_fn = Wrapper.mlx_floor,
-            TIn = Number,
+            TIn = Real, # MLX: [floor] Not supported for complex64
             output_type = return_input_type,
             preserves_type = true,
             normalize = (a, TIn) -> a,
         ),
         :imag => (
             mlx_fn = Wrapper.mlx_imag,
-            TIn = Number,
+            TIn = Real, # testing segfaults wrt. Complex{<:AbstractFloat}
             output_type = return_input_type,
             preserves_type = true,
             normalize = (a, TIn) -> a,
@@ -152,22 +152,22 @@ function get_unary_scalar_ops()
         :isfinite => (
             mlx_fn = Wrapper.mlx_isfinite,
             TIn = Number,
-            output_type = return_input_type,
-            preserves_type = true,
+            output_type = (::Type) -> Bool,
+            preserves_type = false,
             normalize = (a, TIn) -> a,
         ),
         :isinf => (
             mlx_fn = Wrapper.mlx_isinf,
             TIn = Number,
-            output_type = return_input_type,
-            preserves_type = true,
+            output_type = (::Type) -> Bool,
+            preserves_type = false,
             normalize = (a, TIn) -> a,
         ),
         :isnan => (
             mlx_fn = Wrapper.mlx_isnan,
             TIn = Number,
-            output_type = return_input_type,
-            preserves_type = true,
+            output_type = (::Type) -> Bool,
+            preserves_type = false,
             normalize = (a, TIn) -> a,
         ),
         # mlx_isneginf
