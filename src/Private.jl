@@ -75,12 +75,12 @@ function get_unary_scalar_ops()
         # mlx_atleast_3d
         :ceil => (
             mlx_fn = Wrapper.mlx_ceil,
-            TIn = Number,
+            TIn = Real, # MLX: [floor] Not supported for complex64
             output_type = return_input_type,
             preserves_type = true,
             normalize = (a, TIn) -> a,
         ),
-        :conj => (
+        :conj => ( # TODO: conj is also defined for AbstractArray
             mlx_fn = Wrapper.mlx_conjugate,
             TIn = Number,
             output_type = return_input_type,
