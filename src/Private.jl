@@ -17,28 +17,28 @@ function get_unary_ops()
         ),
         :acos => (
             mlx_fn = Wrapper.mlx_arccos,
-            TIn = RealExceptBool,
+            TIn = RealExceptBool, # acos differs from mlx_arccos wrt. Bool, Complex{<:AbstractFloat}
             output_type = (::Type) -> Float32, # TODO: Float64 unsupported by MLX C 0.1.1
             preserves_type = false,
-            normalize = (a, TIn) -> TIn.(a ./ abs.(a)),
+            normalize = (a, TIn) -> floor.(TIn, a ./ maximum(a)),
         ),
         :acosh => (
             mlx_fn = Wrapper.mlx_arccosh,
-            TIn = AbstractFloat,
+            TIn = Union{AbstractFloat, Complex}, # acosh differs from mlx_arccosh wrt. Integer
             output_type = return_input_type,
             preserves_type = true,
             normalize = (a, TIn) -> a .+ 1,
         ),
         :asin => (
             mlx_fn = Wrapper.mlx_arcsin,
-            TIn = AbstractFloat,
+            TIn = AbstractFloat, # asin differs from mlx_arcsin wrt. Integer, normalize fails for Complex{<:AbstractFloat}
             output_type = return_input_type,
             preserves_type = true,
-            normalize = (a, TIn) -> a,
+            normalize = (a, TIn) -> floor.(TIn, a ./ maximum(a)),
         ),
         :asinh => (
             mlx_fn = Wrapper.mlx_arcsinh,
-            TIn = AbstractFloat,
+            TIn = Union{AbstractFloat, Complex}, # asinh differs from mlx_arcsinh wrt. Integer
             output_type = return_input_type,
             preserves_type = true,
             normalize = (a, TIn) -> a,
