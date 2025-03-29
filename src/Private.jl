@@ -15,6 +15,13 @@ function get_unary_array_ops()
             preserves_type = true,
             normalize = (a, TIn) -> a,
         ),
+        :copy => (
+            mlx_fn = Wrapper.mlx_copy,
+            TIn = Number,
+            output_type = return_input_type,
+            preserves_type = true,
+            normalize = (a, TIn) -> a,
+        ),
     )
 end
 
@@ -82,13 +89,6 @@ function get_unary_scalar_ops()
         ),
         :conj => ( # TODO: conj is also defined for AbstractArray
             mlx_fn = Wrapper.mlx_conjugate,
-            TIn = Number,
-            output_type = return_input_type,
-            preserves_type = true,
-            normalize = (a, TIn) -> a,
-        ),
-        :copy => (
-            mlx_fn = Wrapper.mlx_copy,
             TIn = Number,
             output_type = return_input_type,
             preserves_type = true,
