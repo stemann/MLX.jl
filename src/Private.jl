@@ -302,7 +302,6 @@ function get_unary_scalar_ops()
         #     preserves_type = true,
         #     normalize = (a, TIn) -> a,
         # ),
-        # mlx_zeros_like
         # mlx_random_split
         # mlx_linalg_inv
         # :pinv => ( # TODO using LinearAlgebra
