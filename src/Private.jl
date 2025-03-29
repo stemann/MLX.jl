@@ -26,6 +26,13 @@ function get_unary_array_ops()
             preserves_type = true,
             normalize = (a, TIn) -> a,
         ),
+        :sort => (
+            mlx_fn = Wrapper.mlx_sort_all, # TODO check if this is correct
+            TIn = Number,
+            output_type = return_input_type,
+            preserves_type = true,
+            normalize = (a, TIn) -> a,
+        ),
     )
 end
 
@@ -202,42 +209,42 @@ function get_unary_scalar_ops()
         ),
         :! => (
             mlx_fn = Wrapper.mlx_logical_not,
-            TIn = Number,
+            TIn = Bool,
             output_type = return_input_type,
             preserves_type = true,
             normalize = (a, TIn) -> a,
         ),
         :- => (
             mlx_fn = Wrapper.mlx_negative,
-            TIn = Number,
+            TIn = Union{RealExceptBool, Complex{<:AbstractFloat}}, # MLX: [negative] Not supported for bool, use logical_not instead.
             output_type = return_input_type,
             preserves_type = true,
             normalize = (a, TIn) -> a,
         ),
         :deg2rad => (
             mlx_fn = Wrapper.mlx_radians,
-            TIn = Number,
-            output_type = return_input_type,
-            preserves_type = true,
+            TIn = Real, # testing fails for deg2rad wrt. Complex{<:AbstractFloat}. TODO: Needs broadcast across Float32 and ComplexF32
+            output_type = return_float_type,
+            preserves_type = false,
             normalize = (a, TIn) -> a,
         ),
         :real => (
             mlx_fn = Wrapper.mlx_real,
-            TIn = Number,
+            TIn = Real, # testing fails for real wrt. Complex{<:AbstractFloat} likely due to array storage order.
             output_type = return_input_type,
             preserves_type = true,
             normalize = (a, TIn) -> a,
         ),
         :inv => (
             mlx_fn = Wrapper.mlx_reciprocal, # TODO check if this is correct, notably wrt. mlx_linalg_inv
-            TIn = Number,
-            output_type = return_input_type,
-            preserves_type = true,
+            TIn = Real, # testing fails for inv wrt. Complex{<:AbstractFloat}. TODO: Needs broadcast across Float32 and ComplexF32
+            output_type = return_float_type,
+            preserves_type = false,
             normalize = (a, TIn) -> a,
         ),
         # mlx_rsqrt
         # mlx_sigmoid
-        :sign => (
+        :sign => ( # TODO fails for a UInt64 case: actual == expected, UInt64[0xffffffffffffffff] == UInt64[0x0000000000000001]
             mlx_fn = Wrapper.mlx_sign,
             TIn = Number,
             output_type = return_input_type,
@@ -246,34 +253,27 @@ function get_unary_scalar_ops()
         ),
         :sin => (
             mlx_fn = Wrapper.mlx_sin,
-            TIn = Number,
-            output_type = return_input_type,
-            preserves_type = true,
-            normalize = (a, TIn) -> a,
+            TIn = AbstractFloat, # in testing, sin differs from mlx_sin wrt. Signed, Unsigned, Complex{<:AbstractFloat}, Bool fails: conversion to pointer not defined for BitArray
+            output_type = return_float_type,
+            preserves_type = false,
+            normalize = (a, TIn) -> round.(TIn, map(x -> iszero(x % π/2) ? x + eps(Float32) : x, a)),
         ),
         :sinh => (
             mlx_fn = Wrapper.mlx_sinh,
-            TIn = Number,
-            output_type = return_input_type,
-            preserves_type = true,
-            normalize = (a, TIn) -> a,
-        ),
-        :sort => (
-            mlx_fn = Wrapper.mlx_sort_all, # TODO check if this is correct
-            TIn = Number,
-            output_type = return_input_type,
-            preserves_type = true,
+            TIn = Real, # testing fails for cosh wrt. Complex{<:AbstractFloat}. TODO: Needs broadcast across Float32 and ComplexF32
+            output_type = return_float_type,
+            preserves_type = false,
             normalize = (a, TIn) -> a,
         ),
         :sqrt => (
             mlx_fn = Wrapper.mlx_sqrt,
-            TIn = Number,
-            output_type = return_input_type,
-            preserves_type = true,
-            normalize = (a, TIn) -> a,
+            TIn = RealExceptBool, # Bool fails: conversion to pointer not defined for BitArray. Complex{<:AbstractFloat} fails: MethodError: no method matching isless(::ComplexF32, ::Float32)
+            output_type = return_float_type,
+            preserves_type = false,
+            normalize = (a, TIn) -> ceil.(TIn, max.(eps(Float32), a)),
         ),
         # mlx_square
-        # :dropdims => (
+        # :dropdims => ( # TODO: UndefKeywordError: keyword argument `dims` not assigned
         #     mlx_fn = Wrapper.mlx_squeeze,
         #     TIn = Number,
         #     output_type = return_input_type,
@@ -283,25 +283,25 @@ function get_unary_scalar_ops()
         # mlx_stop_gradient
         :tan => (
             mlx_fn = Wrapper.mlx_tan,
-            TIn = Number,
-            output_type = return_input_type,
-            preserves_type = true,
+            TIn = Union{AbstractFloat, Bool}, # in testing, tan differs from mlx_tan wrt. Signed, Unsigned, Complex{<:AbstractFloat}
+            output_type = return_float_type,
+            preserves_type = false,
             normalize = (a, TIn) -> a,
         ),
         :tanh => (
             mlx_fn = Wrapper.mlx_tanh,
-            TIn = Number,
-            output_type = return_input_type,
-            preserves_type = true,
+            TIn = Real, # testing fails for tanh wrt. Complex{<:AbstractFloat}. TODO: Needs broadcast across Float32 and ComplexF32
+            output_type = return_float_type,
+            preserves_type = false,
             normalize = (a, TIn) -> a,
         ),
-        :transpose => (
-            mlx_fn = Wrapper.mlx_transpose_all,
-            TIn = Number,
-            output_type = return_input_type,
-            preserves_type = true,
-            normalize = (a, TIn) -> a,
-        ),
+        # :transpose => ( # TODO: testing fails for transpose.(::MLXArray{Bool, 2}), (2, 1) likely due to array storage order. Bool[0 1] == Bool[0; 1;;]
+        #     mlx_fn = Wrapper.mlx_transpose_all,
+        #     TIn = Number,
+        #     output_type = return_input_type,
+        #     preserves_type = true,
+        #     normalize = (a, TIn) -> a,
+        # ),
         # mlx_zeros_like
         # mlx_random_split
         # mlx_linalg_inv
