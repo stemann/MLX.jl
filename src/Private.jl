@@ -174,31 +174,31 @@ function get_unary_scalar_ops()
         # mlx_isposinf
         :log => (
             mlx_fn = Wrapper.mlx_log,
-            TIn = Number,
-            output_type = return_input_type,
-            preserves_type = true,
-            normalize = (a, TIn) -> a,
+            TIn = RealExceptBool, # Bool fails: conversion to pointer not defined for BitArray. Complex{<:AbstractFloat} fails: MethodError: no method matching isless(::ComplexF32, ::Float32)
+            output_type = return_float_type,
+            preserves_type = false,
+            normalize = (a, TIn) -> ceil.(TIn, max.(eps(Float32), a)),
         ),
         :log10 => (
             mlx_fn = Wrapper.mlx_log10,
-            TIn = Number,
-            output_type = return_input_type,
-            preserves_type = true,
-            normalize = (a, TIn) -> a,
+            TIn = RealExceptBool, # Bool fails: conversion to pointer not defined for BitArray. Complex{<:AbstractFloat} fails: MethodError: no method matching isless(::ComplexF32, ::Float32)
+            output_type = return_float_type,
+            preserves_type = false,
+            normalize = (a, TIn) -> ceil.(TIn, max.(eps(Float32), a)),
         ),
         :log1p => (
             mlx_fn = Wrapper.mlx_log1p,
-            TIn = Number,
-            output_type = return_input_type,
-            preserves_type = true,
-            normalize = (a, TIn) -> a,
+            TIn = RealExceptBool, # Bool fails: conversion to pointer not defined for BitArray. Complex{<:AbstractFloat} fails: MethodError: no method matching isless(::ComplexF32, ::Float32)
+            output_type = return_float_type,
+            preserves_type = false,
+            normalize = (a, TIn) -> ceil.(TIn, max.(eps(Float32), a)),
         ),
         :log2 => (
             mlx_fn = Wrapper.mlx_log2,
-            TIn = Number,
-            output_type = return_input_type,
-            preserves_type = true,
-            normalize = (a, TIn) -> a,
+            TIn = RealExceptBool, # Bool fails: conversion to pointer not defined for BitArray. Complex{<:AbstractFloat} fails: MethodError: no method matching isless(::ComplexF32, ::Float32)
+            output_type = return_float_type,
+            preserves_type = false,
+            normalize = (a, TIn) -> ceil.(TIn, max.(eps(Float32), a)),
         ),
         :! => (
             mlx_fn = Wrapper.mlx_logical_not,
