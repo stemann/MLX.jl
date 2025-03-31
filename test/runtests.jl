@@ -6,5 +6,6 @@ using Test
     include(joinpath(@__DIR__, "ErrorHandlingTests.jl"))
     include(joinpath(@__DIR__, "NumberTests.jl"))
     include(joinpath(@__DIR__, "NumberTypesTests.jl"))
+    include(joinpath(@__DIR__, "ops_tests.jl"))
     include(joinpath(@__DIR__, "StreamTests.jl"))
 end
