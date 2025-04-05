@@ -2,6 +2,22 @@ module Private
 
 using ..Wrapper
 
+struct UnaryFunction
+    mlx_fn::Function
+    input_type::Type
+    args::NamedTuple
+    kwargs::NamedTuple
+    return_type_fn::Function
+end
+
+function UnaryFunction(mlx_fn::Function)
+    return UnaryFunction(mlx_fn, Number)
+end
+
+function UnaryFunction(mlx_fn::Function, input_type::Type)
+    return UnaryFunction(mlx_fn, input_type, NamedTuple(), NamedTuple(), return_input_type)
+end
+
 function return_input_type(::Type{TIn}) where {TIn}
     return TIn
 end
