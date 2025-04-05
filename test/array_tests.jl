@@ -15,6 +15,7 @@ using Test
         Int64,
         # TODO Float16, 
         Float32,
+        Float64,
         # TODO Core.BFloat16
         ComplexF32,
     )
@@ -46,7 +47,7 @@ using Test
             @test unsafe_wrap(mlx_array) == array
         end
     end
-    for T in [Float64]
-        @test_throws ArgumentError convert(MLX.Wrapper.mlx_dtype, T)
+    @testset "Unsupported Number types" begin
+        @test_throws ArgumentError convert(MLX.Wrapper.mlx_dtype, Rational{Int})
     end
 end

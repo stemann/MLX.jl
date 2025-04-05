@@ -23,8 +23,9 @@ const mlx_array = mlx_array_
     MLX_INT64 = 8
     MLX_FLOAT16 = 9
     MLX_FLOAT32 = 10
-    MLX_BFLOAT16 = 11
-    MLX_COMPLEX64 = 12
+    MLX_FLOAT64 = 11
+    MLX_BFLOAT16 = 12
+    MLX_COMPLEX64 = 13
 end
 
 const mlx_dtype = mlx_dtype_
@@ -43,7 +44,7 @@ function mlx_array_tostring(str, arr)
     ccall((:mlx_array_tostring, libmlxc), Cint, (Ptr{mlx_string}, mlx_array), str, arr)
 end
 
-# no prototype is found for this function at array.h:66:11, please use with caution
+# no prototype is found for this function at array.h:67:11, please use with caution
 function mlx_array_new()
     ccall((:mlx_array_new, libmlxc), mlx_array, ())
 end
@@ -60,8 +61,20 @@ function mlx_array_new_int(val)
     ccall((:mlx_array_new_int, libmlxc), mlx_array, (Cint,), val)
 end
 
+function mlx_array_new_float32(val)
+    ccall((:mlx_array_new_float32, libmlxc), mlx_array, (Cfloat,), val)
+end
+
 function mlx_array_new_float(val)
     ccall((:mlx_array_new_float, libmlxc), mlx_array, (Cfloat,), val)
+end
+
+function mlx_array_new_float64(val)
+    ccall((:mlx_array_new_float64, libmlxc), mlx_array, (Cdouble,), val)
+end
+
+function mlx_array_new_double(val)
+    ccall((:mlx_array_new_double, libmlxc), mlx_array, (Cdouble,), val)
 end
 
 function mlx_array_new_complex(real_val, imag_val)
@@ -84,8 +97,20 @@ function mlx_array_set_int(arr, val)
     ccall((:mlx_array_set_int, libmlxc), Cint, (Ptr{mlx_array}, Cint), arr, val)
 end
 
+function mlx_array_set_float32(arr, val)
+    ccall((:mlx_array_set_float32, libmlxc), Cint, (Ptr{mlx_array}, Cfloat), arr, val)
+end
+
 function mlx_array_set_float(arr, val)
     ccall((:mlx_array_set_float, libmlxc), Cint, (Ptr{mlx_array}, Cfloat), arr, val)
+end
+
+function mlx_array_set_float64(arr, val)
+    ccall((:mlx_array_set_float64, libmlxc), Cint, (Ptr{mlx_array}, Cdouble), arr, val)
+end
+
+function mlx_array_set_double(arr, val)
+    ccall((:mlx_array_set_double, libmlxc), Cint, (Ptr{mlx_array}, Cdouble), arr, val)
 end
 
 function mlx_array_set_complex(arr, real_val, imag_val)
@@ -172,6 +197,10 @@ function mlx_array_item_float32(res, arr)
     ccall((:mlx_array_item_float32, libmlxc), Cint, (Ptr{Cfloat}, mlx_array), res, arr)
 end
 
+function mlx_array_item_float64(res, arr)
+    ccall((:mlx_array_item_float64, libmlxc), Cint, (Ptr{Cdouble}, mlx_array), res, arr)
+end
+
 function mlx_array_item_complex64(res, arr)
     ccall((:mlx_array_item_complex64, libmlxc), Cint, (Ptr{ComplexF32}, mlx_array), res, arr)
 end
@@ -214,6 +243,10 @@ end
 
 function mlx_array_data_float32(arr)
     ccall((:mlx_array_data_float32, libmlxc), Ptr{Cfloat}, (mlx_array,), arr)
+end
+
+function mlx_array_data_float64(arr)
+    ccall((:mlx_array_data_float64, libmlxc), Ptr{Cdouble}, (mlx_array,), arr)
 end
 
 function mlx_array_data_complex64(arr)

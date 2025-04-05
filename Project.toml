@@ -10,7 +10,7 @@ ScopedValues = "7e506255-f358-4e82-b7e4-beb19740aa63"
 
 [compat]
 CEnum = "0.5.0"
-MLX_C_jll = "0.1.1"
+MLX_C_jll = "0.1.2"
 ScopedValues = "1"
 julia = "1"
 

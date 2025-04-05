@@ -31,6 +31,8 @@ function Base.convert(::Type{Wrapper.mlx_dtype}, type::Type{<:Number})
         return Wrapper.MLX_FLOAT16
     elseif type == Float32
         return Wrapper.MLX_FLOAT32
+    elseif type == Float64
+        return Wrapper.MLX_FLOAT64
         # TODO Handle Wrapper.MLX_BFLOAT16
     elseif type == ComplexF32
         return Wrapper.MLX_COMPLEX64 # MLX_COMPLEX64 is a complex of Float32
@@ -123,6 +125,8 @@ function Base.unsafe_convert(::Type{Ptr{T}}, array::MLXArray{T, N}) where {T, N}
         # TODO generate wrapper on system with HAS_FLOAT16
     elseif T == Float32
         mlx_array_data = Wrapper.mlx_array_data_float32
+    elseif T == Float64
+        mlx_array_data = Wrapper.mlx_array_data_float64
         # TODO generate wrapper on system with HAS_BFLOAT16
     elseif T == ComplexF32
         mlx_array_data = Wrapper.mlx_array_data_complex64

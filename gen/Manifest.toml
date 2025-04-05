@@ -104,9 +104,9 @@ version = "1.11.0"
 
 [[deps.MLX_C_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "MLX_jll"]
-git-tree-sha1 = "e03310c371a558583c036e9318ef0ba020b8631a"
+git-tree-sha1 = "9cea2e17dfb725594a47e52a762d971301f08b61"
 uuid = "6073304d-8c11-559f-8a83-5ce24a08dcab"
-version = "0.1.1+0"
+version = "0.1.2+0"
 
 [[deps.MLX_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "OpenBLAS32_jll", "OpenMPI_jll", "libblastrampoline_jll"]
@@ -146,9 +146,9 @@ version = "0.3.29+0"
 
 [[deps.OpenMPI_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Hwloc_jll", "JLLWrappers", "LazyArtifacts", "Libdl", "MPIPreferences", "TOML", "Zlib_jll"]
-git-tree-sha1 = "da913f03f17b449951e0461da960229d4a3d1a8c"
+git-tree-sha1 = "047b66eb62f3cae59ed260ebb9075a32a04350f1"
 uuid = "fe0851c0-eecd-5654-98d4-656369965a5c"
-version = "5.0.7+1"
+version = "5.0.7+2"
 
 [[deps.Pkg]]
 deps = ["Artifacts", "Dates", "Downloads", "FileWatching", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "Random", "SHA", "TOML", "Tar", "UUIDs", "p7zip_jll"]
