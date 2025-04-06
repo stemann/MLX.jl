@@ -11,7 +11,9 @@ end
 Return an array with singleton dimensions removed. If `dims` is not specified,
 all singleton dimensions are removed.
 """
-function Base.dropdims(a::MLXArray{T, N}; dims::Union{Dims, Integer, Nothing} = nothing) where {T, N}
+function Base.dropdims(
+    a::MLXArray{T, N}; dims::Union{Dims, Integer, Nothing} = nothing
+) where {T, N}
     s = get_stream()
     result = Ref(Wrapper.mlx_array_new())
     if isnothing(dims)
@@ -61,7 +63,9 @@ function Base.sortperm(a::MLXArray{T, N}; dims::Integer) where {T, N}
 end
 
 # TODO: testing fails for transpose.(::MLXArray{Bool, 2}), (2, 1) likely due to array storage order. Bool[0 1] == Bool[0; 1;;]
-function Base.transpose(a::MLXArray{T, N}; dims::Union{Dims, Integer, Nothing} = nothing) where {T, N}
+function Base.transpose(
+    a::MLXArray{T, N}; dims::Union{Dims, Integer, Nothing} = nothing
+) where {T, N}
     s = get_stream()
     result = Ref(Wrapper.mlx_array_new())
     if isnothing(dims)

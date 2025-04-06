@@ -39,8 +39,7 @@ using Test
     @testset "dropdims" begin
         for T in element_types, array_size in array_sizes
             N = length(array_size)
-            ndims_to_drop = rand(1:N)
-            dims = Dims(unique(rand(1:N, ndims_to_drop)))
+            dims = Dims(unique(rand(1:N, rand(1:N))))
             if !all([array_size[d] == 1 for d in dims])
                 continue
             end
@@ -62,7 +61,7 @@ using Test
 
     for fn in [:sort] # TODO sortperm is broken
         @testset "$fn" begin
-            for T in filter(T -> T != ComplexF32, element_types), # MethodError: no method matching isless(::ComplexF32, ::ComplexF32)
+            for T in filter(T -> T != ComplexF32, element_types), # isless is not defined for ComplexF32
                 array_size in array_sizes
 
                 N = length(array_size)
@@ -85,6 +84,29 @@ using Test
                     end
                     @test actual == expected
                 end
+            end
+        end
+    end
+
+    @testset "transpose" begin
+        for T in element_types, array_size in array_sizes
+            N = length(array_size)
+            @testset "transpose(::$MLXArray{$T, $N}), $array_size" begin
+                array = rand(T, array_size)
+                if N > 2 || N == 0
+                    mlx_array = MLXArray(array)
+                elseif N > 1
+                    mlx_array = MLXMatrix(array)
+                else
+                    mlx_array = MLXVector(array)
+                end
+                actual = transpose(mlx_array)
+                if N > 2
+                    expected = permutedims(array, ndims(array):-1:1)
+                else
+                    expected = transpose(array)
+                end
+                @test actual == expected
             end
         end
     end
