@@ -16,6 +16,79 @@ using Test
         (2, 2),
         (1, 1, 1),
     ]
+
+    @testset "copy" begin
+        for T in element_types, array_size in array_sizes
+            N = length(array_size)
+            @testset "copy(::$MLXArray{$T, $N}), $array_size" begin
+                array = rand(T, array_size)
+                if N > 2 || N == 0
+                    mlx_array = MLXArray(array)
+                elseif N > 1
+                    mlx_array = MLXMatrix(array)
+                else
+                    mlx_array = MLXVector(array)
+                end
+                actual = copy(mlx_array)
+                expected = copy(array)
+                @test actual == expected
+            end
+        end
+    end
+
+    @testset "dropdims" begin
+        for T in element_types, array_size in array_sizes
+            N = length(array_size)
+            ndims_to_drop = rand(1:N)
+            dims = Dims(unique(rand(1:N, ndims_to_drop)))
+            if !all([array_size[d] == 1 for d in dims])
+                continue
+            end
+            @testset "dropdims(::$MLXArray{$T, $N}; dims = $dims), $array_size" begin
+                array = rand(T, array_size)
+                if N > 2 || N == 0
+                    mlx_array = MLXArray(array)
+                elseif N > 1
+                    mlx_array = MLXMatrix(array)
+                else
+                    mlx_array = MLXVector(array)
+                end
+                actual = dropdims(mlx_array; dims)
+                expected = dropdims(array; dims)
+                @test actual == expected
+            end
+        end
+    end
+
+    for fn in [:sort] # TODO sortperm is broken
+        @testset "$fn" begin
+            for T in filter(T -> T != ComplexF32, element_types), # MethodError: no method matching isless(::ComplexF32, ::ComplexF32)
+                array_size in array_sizes
+
+                N = length(array_size)
+                dims = rand(1:N)
+                @testset "$fn(::$MLXArray{$T, $N}), $array_size" begin
+                    array = rand(T, array_size)
+                    if N > 2 || N == 0
+                        mlx_array = MLXArray(array)
+                    elseif N > 1
+                        mlx_array = MLXMatrix(array)
+                    else
+                        mlx_array = MLXVector(array)
+                    end
+                    if N == 1
+                        actual = @eval $fn($mlx_array)
+                        expected = @eval $fn($array)
+                    else
+                        actual = @eval $fn($mlx_array; dims = $dims)
+                        expected = @eval $fn($array; dims = $dims)
+                    end
+                    @test actual == expected
+                end
+            end
+        end
+    end
+
     for (fn, fn_def) in MLX.Private.get_unary_scalar_ops()
         @testset "$fn" begin
             for T in element_types, array_size in array_sizes
