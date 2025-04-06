@@ -10,27 +10,6 @@ function return_float_type(::Type{TIn}) where {TIn}
     return TIn <: Complex{<:AbstractFloat} ? TIn : Float32 # TODO: Float64 unsupported by MLX C 0.1.1
 end
 
-function get_unary_array_ops()
-    return Dict(
-        :copy => (
-            mlx_fn = Wrapper.mlx_copy,
-            TIn = Number,
-            output_type = return_input_type,
-            preserves_type = true,
-            kwargs_types = NamedTuple(),
-            normalize = (a, TIn) -> a,
-        ),
-        :transpose => ( # TODO: testing fails for transpose.(::MLXArray{Bool, 2}), (2, 1) likely due to array storage order. Bool[0 1] == Bool[0; 1;;]
-            mlx_fn = Wrapper.mlx_transpose_all, # mlx_transpose
-            TIn = Number,
-            output_type = return_input_type,
-            preserves_type = true,
-            kwargs_types = NamedTuple(),
-            normalize = (a, TIn) -> a,
-        ),
-    )
-end
-
 function get_unary_scalar_ops()
     RealExceptBool = Union{AbstractFloat, Signed, Unsigned}
     return Dict(
