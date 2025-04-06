@@ -12,36 +12,12 @@ end
 
 function get_unary_array_ops()
     return Dict(
-        :sortperm => (
-            mlx_fn = Wrapper.mlx_argsort_all, # TODO check if this is correct # mlx_argsort
-            TIn = Number,
-            output_type = return_input_type,
-            preserves_type = true,
-            kwargs_types = (; dims = Integer),
-            normalize = (a, TIn) -> a,
-        ),
         :copy => (
             mlx_fn = Wrapper.mlx_copy,
             TIn = Number,
             output_type = return_input_type,
             preserves_type = true,
             kwargs_types = NamedTuple(),
-            normalize = (a, TIn) -> a,
-        ),
-        :sort => (
-            mlx_fn = Wrapper.mlx_sort_all, # TODO check if this is correct # mlx_sort
-            TIn = Number,
-            output_type = return_input_type,
-            preserves_type = true,
-            kwargs_types = (; dims = Integer),
-            normalize = (a, TIn) -> a,
-        ),
-        :dropdims => (
-            mlx_fn = Wrapper.mlx_squeeze_all, # mlx_squeeze
-            TIn = Number,
-            output_type = return_input_type,
-            preserves_type = true,
-            kwargs_types = (; dims = Integer),
             normalize = (a, TIn) -> a,
         ),
         :transpose => ( # TODO: testing fails for transpose.(::MLXArray{Bool, 2}), (2, 1) likely due to array storage order. Bool[0 1] == Bool[0; 1;;]
