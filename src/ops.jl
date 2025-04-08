@@ -59,6 +59,7 @@ function Base.sortperm(a::MLXArray{T, N}; dims::Integer) where {T, N}
     row_major_dims = ndims(a) - dims + 1
     axis = Cint(row_major_dims) - one(Cint)
     Wrapper.mlx_argsort(result, a.mlx_array, axis, s.mlx_stream)
+    Wrapper.mlx_add(result, result[], Wrapper.mlx_array_new_int(1), s.mlx_stream)
     return MLXArray{T, N}(result[])
 end
 
