@@ -41,11 +41,12 @@ function Base.convert(::Type{Wrapper.mlx_dtype}, type::Type{<:Number})
     end
 end
 
-function MLXArray{T, N}(array::AbstractArray{T, N}) where {T, N}
-    shape = Ref(Cint.(reverse(size(array))))
+function MLXArray{T, N}(array::AbstractArray{T, N}; reversedims = true) where {T, N}    
+    array_row_major = reversedims ? permutedims(array, reverse(1:ndims(array))) : array
+    shape = collect(Cint.(size(array)))
     dtype = convert(Wrapper.mlx_dtype, T)
-    mlx_array = GC.@preserve array shape Wrapper.mlx_array_new_data(
-        pointer(array), shape, N, dtype
+    mlx_array = GC.@preserve array_row_major shape Wrapper.mlx_array_new_data(
+        pointer(array_row_major), pointer(shape), Cint(N), dtype
     )
     return MLXArray{T, N}(mlx_array)
 end
@@ -67,13 +68,11 @@ const MLXVecOrMat{T} = Union{MLXVector{T}, MLXMatrix{T}}
 function Base.size(array::MLXArray)
     return Tuple(
         Int.(
-            reverse(
-                unsafe_wrap(
-                    Vector{Cint},
-                    Wrapper.mlx_array_shape(array.mlx_array),
-                    Wrapper.mlx_array_ndim(array.mlx_array),
-                ),
-            )
+            unsafe_wrap(
+                Vector{Cint},
+                Wrapper.mlx_array_shape(array.mlx_array),
+                Wrapper.mlx_array_ndim(array.mlx_array),
+            ),
         ),
     )
 end
@@ -98,13 +97,11 @@ end
 function Base.strides(array::MLXArray)
     return Tuple(
         Int.(
-            reverse(
-                unsafe_wrap(
-                    Vector{Csize_t},
-                    Wrapper.mlx_array_strides(array.mlx_array),
-                    Wrapper.mlx_array_ndim(array.mlx_array),
-                ),
-            )
+            unsafe_wrap(
+                Vector{Csize_t},
+                Wrapper.mlx_array_strides(array.mlx_array),
+                Wrapper.mlx_array_ndim(array.mlx_array),
+            ),
         ),
     )
 end
@@ -150,7 +147,7 @@ function Base.elsize(array::MLXArray{T, N}) where {T, N}
 end
 
 function Base.unsafe_wrap(array::MLXArray{T, N}) where {T, N}
-    return unsafe_wrap(Array, Base.unsafe_convert(Ptr{T}, array), size(array))
+    return PermutedDimsArray(unsafe_wrap(Array, Base.unsafe_convert(Ptr{T}, array), reverse(size(array))), reverse(1:ndims(array)))
 end
 
 # Broadcasting interface, cf. https://docs.julialang.org/en/v1/manual/interfaces/#man-interfaces-broadcasting
