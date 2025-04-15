@@ -22,8 +22,7 @@ function Base.dropdims(
         if dims isa Integer
             dims = Dims(dims)
         end
-        row_major_dims = ndims(a) .- dims .+ 1
-        axes = collect(Cint.(row_major_dims) .- one(Cint))
+        axes = collect(Cint.(dims) .- one(Cint))
         Wrapper.mlx_squeeze(result, a.mlx_array, axes, length(axes), s.mlx_stream)
     end
     remaining_dims = Int(Wrapper.mlx_array_ndim(result[]))
@@ -40,8 +39,7 @@ end
 function Base.sort(a::MLXArray{T, N}; dims::Integer) where {T, N}
     s = get_stream()
     result = Ref(Wrapper.mlx_array_new())
-    row_major_dims = ndims(a) - dims + 1
-    axis = Cint(row_major_dims) - one(Cint)
+    axis = Cint(dims) - one(Cint)
     Wrapper.mlx_sort(result, a.mlx_array, axis, s.mlx_stream)
     return MLXArray{T, N}(result[])
 end
@@ -56,8 +54,7 @@ end
 function Base.sortperm(a::MLXArray{T, N}; dims::Integer) where {T, N}
     s = get_stream()
     result = Ref(Wrapper.mlx_array_new())
-    row_major_dims = ndims(a) - dims + 1
-    axis = Cint(row_major_dims) - one(Cint)
+    axis = Cint(dims) - one(Cint)
     Wrapper.mlx_argsort(result, a.mlx_array, axis, s.mlx_stream)
     Wrapper.mlx_add(result, result[], Wrapper.mlx_array_new_int(1), s.mlx_stream)
     return MLXArray{T, N}(result[])
@@ -75,8 +72,7 @@ function Base.transpose(
         if dims isa Integer
             dims = Dims(dims)
         end
-        row_major_dims = ndims(a) .- dims .+ 1
-        axes = collect(Cint.(row_major_dims) .- one(Cint))
+        axes = collect(Cint.(dims) .- one(Cint))
         Wrapper.mlx_transpose(result, a.mlx_array, axes, length(axes), s.mlx_stream)
     end
     return MLXArray{T, N}(result[])
