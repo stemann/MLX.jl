@@ -60,8 +60,7 @@ function Base.sortperm(a::MLXArray{T, N}; dims::Integer) where {T, N}
     return MLXArray{T, N}(result[])
 end
 
-# TODO: testing fails for transpose.(::MLXArray{Bool, 2}), (2, 1) likely due to array storage order. Bool[0 1] == Bool[0; 1;;]
-function Base.transpose(
+function Base.permutedims(
     a::MLXArray{T, N}; dims::Union{Dims, Integer, Nothing} = nothing
 ) where {T, N}
     s = get_stream()
