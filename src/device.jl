@@ -3,6 +3,31 @@
     DeviceTypeGPU = 1
 end
 
+function supported_number_types(device_type::DeviceType = DeviceTypeCPU)
+    types = [
+        Bool,
+        UInt8,
+        UInt16,
+        UInt32,
+        UInt64,
+        Int8,
+        Int16,
+        Int32,
+        Int64,
+        # TODO Float16, 
+        Float32,
+        # TODO Core.BFloat16
+        ComplexF32,
+    ]
+    if device_type == DeviceTypeCPU
+        return vcat(types, [Float64])
+    elseif device_type == DeviceTypeGPU
+        return types
+    else
+        throw(ArgumentError("Unsupported device type: $device_type"))
+    end
+end
+
 mutable struct Device
     mlx_device::Wrapper.mlx_device
 
