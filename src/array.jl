@@ -144,5 +144,8 @@ function Base.elsize(array::MLXArray{T, N}) where {T, N}
 end
 
 function Base.unsafe_wrap(array::MLXArray{T, N}) where {T, N}
-    return PermutedDimsArray(unsafe_wrap(Array, Base.unsafe_convert(Ptr{T}, array), reverse(size(array))), reverse(1:ndims(array)))
+    is_column_major = strides(array) == Base.size_to_strides(1, size(array)...)
+    size_column_major = is_column_major ? size(array) : reverse(size(array))
+    wrapped_array = unsafe_wrap(Array, Base.unsafe_convert(Ptr{T}, array), size_column_major)
+    return is_column_major ? wrapped_array : PermutedDimsArray(wrapped_array, reverse(1:ndims(array)))
 end
