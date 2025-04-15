@@ -88,10 +88,10 @@ using Test
         end
     end
 
-    @testset "transpose" begin
+    @testset "permutedims" begin
         for T in element_types, array_size in array_sizes
             N = length(array_size)
-            @testset "transpose(::$MLXArray{$T, $N}), $array_size" begin
+            @testset "permutedims(::$MLXArray{$T, $N}), $array_size" begin
                 array = rand(T, array_size)
                 if N > 2 || N == 0
                     mlx_array = MLXArray(array)
@@ -100,12 +100,8 @@ using Test
                 else
                     mlx_array = MLXVector(array)
                 end
-                actual = transpose(mlx_array)
-                if N > 2
-                    expected = permutedims(array, ndims(array):-1:1)
-                else
-                    expected = transpose(array)
-                end
+                actual = permutedims(mlx_array)
+                expected = permutedims(array, reverse(1:ndims(array)))
                 @test actual == expected
             end
         end
