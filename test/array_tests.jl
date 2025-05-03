@@ -3,24 +3,10 @@ using Test
 
 @testset "MLXArray" begin
     @test IndexStyle(MLXArray) == IndexLinear()
-    element_types = (
-        Bool,
-        UInt8,
-        UInt16,
-        UInt32,
-        UInt64,
-        Int8,
-        Int16,
-        Int32,
-        Int64,
-        # TODO Float16, 
-        Float32,
-        Float64,
-        # TODO Core.BFloat16
-        ComplexF32,
-    )
     array_sizes = [(), (1,), (2,), (1, 1), (2, 1), (3, 2), (4, 3, 2)]
     @testset "AbstractArray interface" begin
+        element_types = MLX.supported_number_types()
+
         for T in element_types, array_size in array_sizes
             N = length(array_size)
             @testset "$MLXArray{$T, $N}, array_size=$array_size" begin
@@ -47,6 +33,8 @@ using Test
         end
     end
     @testset "Strided array interface" begin
+        element_types = MLX.supported_number_types(MLX.DeviceTypeGPU) # TODO Excluding Float64
+
         for T in element_types, array_size in array_sizes
             N = length(array_size)
             @testset "$MLXArray{$T, $N}, array_size=$array_size" begin
