@@ -43,7 +43,8 @@ end
 
 function MLXArray{T, N}(array::AbstractArray{T, N}) where {T, N}
     is_column_major = strides(array) == Base.size_to_strides(1, size(array)...)
-    array_row_major = is_column_major ? permutedims(array, reverse(1:ndims(array))) : array
+    array_row_major =
+        N > 1 && is_column_major ? permutedims(array, reverse(1:ndims(array))) : array
     shape = collect(Cint.(size(array)))
     dtype = convert(Wrapper.mlx_dtype, T)
     mlx_array = GC.@preserve array_row_major shape Wrapper.mlx_array_new_data(

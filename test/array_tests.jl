@@ -41,7 +41,12 @@ using Test
                 array = ones(T, array_size)
                 mlx_array = MLXArray(array)
 
-                @test strides(mlx_array) == reverse(strides(permutedims(array, reverse(1:ndims(array)))))
+                if N > 0
+                    @test strides(mlx_array) ==
+                        reverse(strides(permutedims(array, reverse(1:ndims(array)))))
+                else
+                    @test strides(mlx_array) == strides(array)
+                end
                 @test Base.unsafe_convert(Ptr{T}, mlx_array) isa Ptr{T}
                 @test unsafe_wrap(mlx_array) == array
                 @test Base.elsize(mlx_array) == Base.elsize(array)
