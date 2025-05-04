@@ -149,9 +149,9 @@ function Base.unsafe_wrap(array::MLXArray{T, N}) where {T, N}
     wrapped_array = unsafe_wrap(
         Array, Base.unsafe_convert(Ptr{T}, array), size_column_major
     )
-    return if is_column_major
-        PermutedDimsArray(wrapped_array, 1:ndims(array))
+    if is_column_major
+        return PermutedDimsArray(wrapped_array, 1:ndims(array))
     else
-        PermutedDimsArray(wrapped_array, reverse(1:ndims(array)))
+        return PermutedDimsArray(wrapped_array, reverse(1:ndims(array)))
     end
 end
