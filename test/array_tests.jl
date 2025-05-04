@@ -3,7 +3,9 @@ using Test
 
 @testset "MLXArray" begin
     @test IndexStyle(MLXArray) == IndexLinear()
+
     array_sizes = [(), (1,), (2,), (1, 1), (2, 1), (3, 2), (4, 3, 2)]
+
     @testset "AbstractArray interface" begin
         element_types = MLX.supported_number_types()
 
