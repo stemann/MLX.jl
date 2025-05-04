@@ -42,7 +42,9 @@ function Base.convert(::Type{Wrapper.mlx_dtype}, type::Type{<:Number})
 end
 
 function MLXArray{T, N}(array::AbstractArray{T, N}) where {T, N}
-    is_column_major = storage_order(array, StorageOrderRow) == StorageOrderColumn
+    is_column_major =
+        storage_order(array; preferred_order = ArrayStorageOrderRow) ==
+        ArrayStorageOrderColumn
     array_row_major = is_column_major ? permutedims(array, reverse(1:ndims(array))) : array
     shape = collect(Cint.(size(array)))
     dtype = convert(Wrapper.mlx_dtype, T)
@@ -144,7 +146,7 @@ function Base.elsize(array::MLXArray{T, N}) where {T, N}
 end
 
 function Base.unsafe_wrap(array::MLXArray{T, N}) where {T, N}
-    is_column_major = storage_order(array) == StorageOrderColumn
+    is_column_major = storage_order(array) == ArrayStorageOrderColumn
     size_column_major = is_column_major ? size(array) : reverse(size(array))
     wrapped_array = unsafe_wrap(
         Array, Base.unsafe_convert(Ptr{T}, array), size_column_major
