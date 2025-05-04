@@ -42,9 +42,8 @@ function Base.convert(::Type{Wrapper.mlx_dtype}, type::Type{<:Number})
 end
 
 function MLXArray{T, N}(array::AbstractArray{T, N}) where {T, N}
-    is_column_major = strides(array) == Base.size_to_strides(1, size(array)...)
-    array_row_major =
-        N > 1 && is_column_major ? permutedims(array, reverse(1:ndims(array))) : array
+    is_column_major = storage_order(array, StorageOrderRow) == StorageOrderColumn
+    array_row_major = is_column_major ? permutedims(array, reverse(1:ndims(array))) : array
     shape = collect(Cint.(size(array)))
     dtype = convert(Wrapper.mlx_dtype, T)
     mlx_array = GC.@preserve array_row_major shape Wrapper.mlx_array_new_data(
@@ -145,13 +144,13 @@ function Base.elsize(array::MLXArray{T, N}) where {T, N}
 end
 
 function Base.unsafe_wrap(array::MLXArray{T, N}) where {T, N}
-    is_column_major = strides(array) == Base.size_to_strides(1, size(array)...)
+    is_column_major = storage_order(array) == StorageOrderColumn
     size_column_major = is_column_major ? size(array) : reverse(size(array))
     wrapped_array = unsafe_wrap(
         Array, Base.unsafe_convert(Ptr{T}, array), size_column_major
     )
     return if is_column_major
-        wrapped_array
+        PermutedDimsArray(wrapped_array, 1:ndims(array))
     else
         PermutedDimsArray(wrapped_array, reverse(1:ndims(array)))
     end
