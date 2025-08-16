@@ -92,7 +92,7 @@ end
 # Strided array interface, cf. https://docs.julialang.org/en/v1/manual/interfaces/#man-interface-strided-arrays
 
 function Base.strides(array::MLXArray)
-    return Tuple(
+    array_strides = Tuple(
         Int.(
             unsafe_wrap(
                 Vector{Csize_t},
@@ -101,6 +101,13 @@ function Base.strides(array::MLXArray)
             ),
         ),
     )
+    if any(iszero, array_strides) # Workaround for MLX issue where strides may be zero for dims of size 1: https://github.com/ml-explore/mlx/issues/2501
+        non_zero_strides = map(s -> iszero(s) ? 1 : s, array_strides)
+        @debug "Some strides are zero in $array_strides - returning strides $non_zero_strides for array of size $(size(array))"
+        return non_zero_strides
+    end
+
+    return array_strides
 end
 
 function Base.unsafe_convert(::Type{Ptr{T}}, array::MLXArray{T, N}) where {T, N}
