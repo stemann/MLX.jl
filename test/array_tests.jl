@@ -147,4 +147,21 @@ using Test
     @testset "Unsupported Number types" begin
         @test_throws ArgumentError convert(MLX.Wrapper.mlx_dtype, Rational{Int})
     end
+
+    @testset "BitArray" begin
+        for array_size in array_sizes
+            N = length(array_size)
+            @testset "$MLXArray{Bool, $N}(::BitArray), array_size=$array_size" begin
+                array = BitArray(rand(Bool, array_size))
+                if N > 2 || N == 0
+                    mlx_array = MLXArray(array)
+                elseif N > 1
+                    mlx_array = MLXMatrix(array)
+                else
+                    mlx_array = MLXVector(array)
+                end
+                @test array == mlx_array
+            end
+        end
+    end
 end
