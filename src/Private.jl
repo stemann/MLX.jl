@@ -88,7 +88,7 @@ function get_unary_scalar_ops()
         ),
         :cos => (
             mlx_fn = Wrapper.mlx_cos,
-            TIn = AbstractFloat, # in testing, cos differs from mlx_cos wrt. Signed, Unsigned, Complex{<:AbstractFloat}, Bool fails: conversion to pointer not defined for BitArray
+            TIn = Union{AbstractFloat, Bool}, # in testing, cos differs from mlx_cos wrt. Signed, Unsigned, Complex{<:AbstractFloat}
             output_type = return_float_type,
             preserves_type = false,
             normalize = (a, TIn) ->
@@ -163,28 +163,28 @@ function get_unary_scalar_ops()
         # mlx_isposinf
         :log => (
             mlx_fn = Wrapper.mlx_log,
-            TIn = RealExceptBool, # Bool fails: conversion to pointer not defined for BitArray. Complex{<:AbstractFloat} fails: MethodError: no method matching isless(::ComplexF32, ::Float32)
+            TIn = Real, # Complex{<:AbstractFloat} fails: MethodError: no method matching isless(::ComplexF32, ::Float32)
             output_type = return_float_type,
             preserves_type = false,
             normalize = (a, TIn) -> TIn.(ceil.(max.(eps(Float32), a))),
         ),
         :log10 => (
             mlx_fn = Wrapper.mlx_log10,
-            TIn = RealExceptBool, # Bool fails: conversion to pointer not defined for BitArray. Complex{<:AbstractFloat} fails: MethodError: no method matching isless(::ComplexF32, ::Float32)
+            TIn = Real, # Complex{<:AbstractFloat} fails: MethodError: no method matching isless(::ComplexF32, ::Float32)
             output_type = return_float_type,
             preserves_type = false,
             normalize = (a, TIn) -> TIn.(ceil.(max.(eps(Float32), a))),
         ),
         :log1p => (
             mlx_fn = Wrapper.mlx_log1p,
-            TIn = RealExceptBool, # Bool fails: conversion to pointer not defined for BitArray. Complex{<:AbstractFloat} fails: MethodError: no method matching isless(::ComplexF32, ::Float32)
+            TIn = Real, # Complex{<:AbstractFloat} fails: MethodError: no method matching isless(::ComplexF32, ::Float32)
             output_type = return_float_type,
             preserves_type = false,
             normalize = (a, TIn) -> TIn.(ceil.(max.(eps(Float32), a))),
         ),
         :log2 => (
             mlx_fn = Wrapper.mlx_log2,
-            TIn = RealExceptBool, # Bool fails: conversion to pointer not defined for BitArray. Complex{<:AbstractFloat} fails: MethodError: no method matching isless(::ComplexF32, ::Float32)
+            TIn = Real, # Complex{<:AbstractFloat} fails: MethodError: no method matching isless(::ComplexF32, ::Float32)
             output_type = return_float_type,
             preserves_type = false,
             normalize = (a, TIn) -> TIn.(ceil.(max.(eps(Float32), a))),
@@ -236,7 +236,7 @@ function get_unary_scalar_ops()
         ),
         :sin => (
             mlx_fn = Wrapper.mlx_sin,
-            TIn = AbstractFloat, # in testing, sin differs from mlx_sin wrt. Signed, Unsigned, Complex{<:AbstractFloat}, Bool fails: conversion to pointer not defined for BitArray
+            TIn = Union{AbstractFloat, Bool}, # in testing, sin differs from mlx_sin wrt. Signed, Unsigned, Complex{<:AbstractFloat}
             output_type = return_float_type,
             preserves_type = false,
             normalize = (a, TIn) ->
@@ -251,7 +251,7 @@ function get_unary_scalar_ops()
         ),
         :sqrt => (
             mlx_fn = Wrapper.mlx_sqrt,
-            TIn = RealExceptBool, # Bool fails: conversion to pointer not defined for BitArray. Complex{<:AbstractFloat} fails: MethodError: no method matching isless(::ComplexF32, ::Float32)
+            TIn = Real, # Complex{<:AbstractFloat} fails: MethodError: no method matching isless(::ComplexF32, ::Float32)
             output_type = return_float_type,
             preserves_type = false,
             normalize = (a, TIn) -> TIn.(ceil.(max.(eps(Float32), a))),
