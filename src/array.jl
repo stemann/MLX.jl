@@ -81,6 +81,14 @@ function MLXArray{T}(::UndefInitializer, dims::Dims{N}) where {T, N}
     return MLXArray{T, N}(undef, dims)
 end
 
+# BitArray
+
+MLXArray(array::BitArray{N}) where {N} = MLXArray(Array{Bool}(array))
+
+MLXVector(array::BitVector) = MLXVector(Vector{Bool}(array))
+
+MLXMatrix(array::BitMatrix) = MLXMatrix(Matrix{Bool}(array))
+
 # AbstractArray interface, cf. https://docs.julialang.org/en/v1/manual/interfaces/#man-interface-array
 
 function Base.size(array::MLXArray)
