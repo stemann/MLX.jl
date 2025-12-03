@@ -1,7 +1,21 @@
+@static if VERSION < v"1.11"
+    using ScopedValues
+else
+    using Base.ScopedValues
+end
+
 using MLX
+using Random
 using Test
 
 @testset "MLXArray" begin
+    Random.seed!(42)
+
+    device_types = [MLX.DeviceTypeCPU]
+    if MLX.metal_is_available()
+        push!(device_types, MLX.DeviceTypeGPU)
+    end
+
     @test IndexStyle(MLXArray) == IndexLinear()
 
     array_sizes = [(), (1,), (2,), (1, 1), (2, 1), (3, 2), (4, 3, 2)]
@@ -30,6 +44,22 @@ using Test
                     @test getindex(mlx_array, 1) == T(1)
                     array[1] = T(1)
                     @test setindex!(mlx_array, T(1), 1) == array
+                end
+
+                @testset "similar(::$MLXArray{$T, $N}), array_size=$array_size" begin
+                    for device_type in device_types
+                        if T ∉ MLX.supported_number_types(device_type)
+                            continue
+                        end
+                        @testset "similar(::$MLXArray{$T, $N}), with array_size=$array_size, $device_type" begin
+                            with(MLX.device => MLX.Device(; device_type)) do
+                                similar_mlx_array = similar(mlx_array)
+                                @test typeof(similar_mlx_array) == typeof(mlx_array)
+                                @test size(similar_mlx_array) == size(mlx_array)
+                                @test similar_mlx_array !== mlx_array
+                            end
+                        end
+                    end
                 end
             end
         end
@@ -62,7 +92,63 @@ using Test
             @test Base.elsize(MLXArray{T, 0}) == Base.elsize(Array{T, 0})
         end
     end
+
     @testset "Unsupported Number types" begin
         @test_throws ArgumentError convert(MLX.Wrapper.mlx_dtype, Rational{Int})
+    end
+
+    @testset "BitArray" begin
+        for array_size in array_sizes
+            N = length(array_size)
+            @testset "$MLXArray{Bool, $N}(::BitArray), array_size=$array_size" begin
+                array = BitArray(rand(Bool, array_size))
+                if N > 2 || N == 0
+                    mlx_array = MLXArray(array)
+                elseif N > 1
+                    mlx_array = MLXMatrix(array)
+                else
+                    mlx_array = MLXVector(array)
+                end
+                @test array == mlx_array
+            end
+        end
+    end
+
+    @testset "Broadcasting interface" begin
+        @testset "broadcast over tuple with no MLXArray" begin
+            result = similar(
+                Broadcast.Broadcasted{Broadcast.ArrayStyle{MLXArray}}(identity, ()), Bool
+            )
+            @test result isa MLXArray{Bool, 0}
+        end
+
+        test_cases(T, array_size) = [
+            (fn = identity, args = ()),
+            (fn = T == Bool ? xor : +, args = (T == Bool ? true : T(2),)),
+            (fn = T == Bool ? xor : +, args = (MLXArray(rand(T, array_size)),)),
+        ]
+        for device_type in device_types,
+            T in MLX.supported_number_types(device_type),
+            array_size in array_sizes,
+            test_case in test_cases(T, array_size)
+
+            compare_op = T <: Integer ? (==) : ≈
+            N = length(array_size)
+            @testset "broadcast($(repr(test_case.fn)), $(join(map(arg -> "::$(typeof(arg))", [MLXArray{T, N}, test_case.args...]), ", "))), array_size=$array_size, $device_type" begin
+                array = rand(T, array_size)
+                mlx_array = MLXArray(array)
+
+                with(MLX.device => MLX.Device(; device_type)) do
+                    actual = broadcast(test_case.fn, mlx_array, test_case.args...)
+                    expected = broadcast(test_case.fn, array, test_case.args...)
+                    if N == 0
+                        @test actual isa T
+                    else
+                        @test actual isa MLXArray{T, N}
+                    end
+                    @test compare_op(actual, expected)
+                end
+            end
+        end
     end
 end

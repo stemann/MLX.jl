@@ -66,6 +66,27 @@ MLXMatrix(array::AbstractMatrix{T}) where {T} = MLXMatrix{T}(array)
 
 const MLXVecOrMat{T} = Union{MLXVector{T}, MLXMatrix{T}}
 
+# UndefInitializer
+
+function MLXArray{T, N}(::UndefInitializer, dims::Dims{N}) where {T, N}
+    stream = get_stream()
+    result_ref = Ref(Wrapper.mlx_array_new())
+    shape = collect(Cint.(dims))
+    dtype = convert(Wrapper.mlx_dtype, T)
+    Wrapper.mlx_zeros(result_ref, pointer(shape), Cint(N), dtype, stream.mlx_stream)
+    return MLXArray{T, N}(result_ref[])
+end
+
+function MLXArray{T}(::UndefInitializer, dims::Dims{N}) where {T, N}
+    return MLXArray{T, N}(undef, dims)
+end
+
+# BitArray
+
+MLXArray{Bool, N}(array::BitArray{N}) where {N} = MLXArray(Array{Bool}(array))
+
+MLXArray(array::BitArray{N}) where {N} = MLXArray{Bool, N}(array)
+
 # AbstractArray interface, cf. https://docs.julialang.org/en/v1/manual/interfaces/#man-interface-array
 
 function Base.size(array::MLXArray)
@@ -87,6 +108,13 @@ Base.getindex(array::MLXArray, i::Int) = getindex(unsafe_wrap(array), i)
 function Base.setindex!(array::MLXArray{T, N}, v::T, i::Int) where {T, N}
     setindex!(unsafe_wrap(array), v, i)
     return array
+end
+
+function Base.similar(array::MLXArray{T, N}, ::Type{T}, ::Dims{N}) where {T, N}
+    stream = get_stream()
+    result_ref = Ref(Wrapper.mlx_array_new())
+    Wrapper.mlx_zeros_like(result_ref, array.mlx_array, stream.mlx_stream)
+    return MLXArray{T, N}(result_ref[])
 end
 
 # Strided array interface, cf. https://docs.julialang.org/en/v1/manual/interfaces/#man-interface-strided-arrays
@@ -163,4 +191,36 @@ function Base.unsafe_wrap(array::MLXArray{T, N}) where {T, N}
     else
         return PermutedDimsArray(wrapped_array, reverse(1:ndims(array)))
     end
+end
+
+# Broadcasting interface, cf. https://docs.julialang.org/en/v1/manual/interfaces/#man-interfaces-broadcasting
+
+Base.BroadcastStyle(::Type{<:MLXArray}) = Broadcast.ArrayStyle{MLXArray}()
+
+function Base.similar(
+    bc::Broadcast.Broadcasted{Broadcast.ArrayStyle{MLXArray}}, ::Type{TElement}
+) where {TElement}
+    first_mlx_array(bc::Broadcast.Broadcasted) = first_mlx_array(bc.args)
+    function first_mlx_array(args::Tuple)
+        return first_mlx_array(first_mlx_array(args[1]), Base.tail(args))
+    end
+    first_mlx_array(x) = x
+    first_mlx_array(::Tuple{}) = nothing
+    first_mlx_array(a::MLXArray, _) = a
+    first_mlx_array(::Any, rest) = first_mlx_array(rest)
+    mlx_array = first_mlx_array(bc)
+    if isnothing(mlx_array)
+        return similar(MLXArray{TElement}, ())
+    end
+    return similar(mlx_array)
+end
+
+function Base.Broadcast.materialize(
+    bc::Broadcast.Broadcasted{Broadcast.ArrayStyle{MLXArray}}
+)
+    result = copy(Broadcast.instantiate(bc))
+    if iszero(ndims(result)) # Drop 0-dim arrays to scalars, cf. https://github.com/JuliaLang/julia/issues/28866
+        return result[]
+    end
+    return result
 end
