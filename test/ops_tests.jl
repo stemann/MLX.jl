@@ -107,7 +107,8 @@ using Test
         end
     end
 
-    for (fn, fn_def) in MLX.Private.get_unary_scalar_ops()
+    for (fn_symbol, fn_def) in MLX.Private.get_unary_scalar_ops()
+        fn = eval(fn_symbol)
         @testset "$fn" begin
             for T in element_types, array_size in array_sizes
                 N = length(array_size)
@@ -126,11 +127,11 @@ using Test
                     end
                     TOut = fn_def.output_type(T)
                     if TOut == Float32 # TODO fn.(array) may return a Float64 array for a Float32 array
-                        expected = @eval $TOut.($fn.($array))
+                        expected = TOut.(fn.(array))
                     else
-                        expected = @eval $fn.($array)
+                        expected = fn.(array)
                     end
-                    actual = @eval $fn.($mlx_array)
+                    actual = fn.(mlx_array)
                     if TOut <: Integer
                         @test actual == expected
                     else
