@@ -8,39 +8,6 @@ mutable struct MLXArray{T, N} <: AbstractArray{T, N}
     end
 end
 
-function Base.convert(::Type{Wrapper.mlx_dtype}, type::Type{<:Number})
-    if type == Bool
-        return Wrapper.MLX_BOOL
-    elseif type == UInt8
-        return Wrapper.MLX_UINT8
-    elseif type == UInt16
-        return Wrapper.MLX_UINT16
-    elseif type == UInt32
-        return Wrapper.MLX_UINT32
-    elseif type == UInt64
-        return Wrapper.MLX_UINT64
-    elseif type == Int8
-        return Wrapper.MLX_INT8
-    elseif type == Int16
-        return Wrapper.MLX_INT16
-    elseif type == Int32
-        return Wrapper.MLX_INT32
-    elseif type == Int64
-        return Wrapper.MLX_INT64
-    elseif type == Float16
-        return Wrapper.MLX_FLOAT16
-    elseif type == Float32
-        return Wrapper.MLX_FLOAT32
-    elseif type == Float64
-        return Wrapper.MLX_FLOAT64
-        # TODO Handle Wrapper.MLX_BFLOAT16
-    elseif type == ComplexF32
-        return Wrapper.MLX_COMPLEX64 # MLX_COMPLEX64 is a complex of Float32
-    else
-        throw(ArgumentError("Unsupported type: $type"))
-    end
-end
-
 function MLXArray{T, N}(array::AbstractArray{T, N}) where {T, N}
     is_column_major =
         storage_order(array; preferred_order = ArrayStorageOrderRow) ==
