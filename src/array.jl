@@ -83,11 +83,9 @@ end
 
 # BitArray
 
-MLXArray(array::BitArray{N}) where {N} = MLXArray(Array{Bool}(array))
+MLXArray{Bool, N}(array::BitArray{N}) where {N} = MLXArray(Array{Bool}(array))
 
-MLXVector(array::BitVector) = MLXVector(Vector{Bool}(array))
-
-MLXMatrix(array::BitMatrix) = MLXMatrix(Matrix{Bool}(array))
+MLXArray(array::BitArray{N}) where {N} = MLXArray{Bool, N}(array)
 
 # AbstractArray interface, cf. https://docs.julialang.org/en/v1/manual/interfaces/#man-interface-array
 
