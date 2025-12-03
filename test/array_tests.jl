@@ -98,20 +98,38 @@ using Test
     end
 
     @testset "Broadcasting interface" begin
+        @testset "broadcast over tuple with no MLXArray" begin
+            result = similar(
+                Broadcast.Broadcasted{Broadcast.ArrayStyle{MLXArray}}(identity, ()), Bool
+            )
+            @test result isa MLXArray{Bool, 0}
+        end
+
+        test_cases(T, array_size) = [
+            (fn = identity, args = ()),
+            (fn = T == Bool ? xor : +, args = (T == Bool ? true : T(2),)),
+            (fn = T == Bool ? xor : +, args = (MLXArray(rand(T, array_size)),)),
+        ]
         for device_type in device_types,
             T in MLX.supported_number_types(device_type),
-            array_size in array_sizes
+            array_size in array_sizes,
+            test_case in test_cases(T, array_size)
 
+            compare_op = T <: Integer ? (==) : ≈
             N = length(array_size)
-            @testset "broadcast(identity, ::$MLXArray{$T, $N}), array_size=$array_size, $device_type" begin
+            @testset "broadcast($(repr(test_case.fn)), $(join(map(arg -> "::$(typeof(arg))", [MLXArray{T, N}, test_case.args...]), ", "))), array_size=$array_size, $device_type" begin
                 array = rand(T, array_size)
                 mlx_array = MLXArray(array)
 
                 with(MLX.device => MLX.Device(; device_type)) do
-                    result = identity.(mlx_array)
-                    @test result isa MLXArray
-                    @test result == mlx_array
-                    @test result !== mlx_array
+                    actual = broadcast(test_case.fn, mlx_array, test_case.args...)
+                    expected = broadcast(test_case.fn, array, test_case.args...)
+                    if N == 0
+                        @test actual isa T
+                    else
+                        @test actual isa MLXArray{T, N}
+                    end
+                    @test compare_op(actual, expected)
                 end
             end
         end
