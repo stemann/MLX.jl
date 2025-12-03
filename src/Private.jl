@@ -10,6 +10,10 @@ function return_float_type(::Type{TIn}) where {TIn}
     return TIn <: Complex{<:AbstractFloat} ? TIn : Float32 # TODO: Float64 unsupported by MLX C 0.1.1
 end
 
+function return_real_type(::Type{TIn}) where {TIn}
+    return TIn <: Complex{<:AbstractFloat} ? real(TIn) : TIn
+end
+
 function get_unary_scalar_ops()
     RealExceptBool = Union{AbstractFloat, Signed, Unsigned}
     return Dict(
@@ -133,9 +137,9 @@ function get_unary_scalar_ops()
         ),
         :imag => (
             mlx_fn = Wrapper.mlx_imag,
-            TIn = Real, # testing fails for imag wrt. Complex{<:AbstractFloat}
-            output_type = return_input_type,
-            preserves_type = true,
+            TIn = Number,
+            output_type = return_real_type,
+            preserves_type = false,
             normalize = (a, TIn) -> a,
         ),
         :isfinite => (
@@ -213,9 +217,9 @@ function get_unary_scalar_ops()
         ),
         :real => (
             mlx_fn = Wrapper.mlx_real,
-            TIn = Real, # testing fails for real wrt. Complex{<:AbstractFloat} likely due to array storage order.
-            output_type = return_input_type,
-            preserves_type = true,
+            TIn = Number,
+            output_type = return_real_type,
+            preserves_type = false,
             normalize = (a, TIn) -> a,
         ),
         :inv => (
