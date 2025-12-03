@@ -110,32 +110,36 @@ using Test
     for (fn_symbol, fn_def) in MLX.Private.get_unary_scalar_ops()
         fn = eval(fn_symbol)
         @testset "$fn" begin
-            for T in element_types, array_size in array_sizes
-                N = length(array_size)
+            for T in element_types
                 if !(T <: fn_def.TIn)
                     continue
                 end
-                @testset "$fn.(::$MLXArray{$T, $N}), $array_size" begin
-                    array = rand(T, array_size)
-                    array = fn_def.normalize(array, T)
-                    if N > 2 || N == 0
-                        mlx_array = MLXArray(array)
-                    elseif N > 1
-                        mlx_array = MLXMatrix(array)
-                    else
-                        mlx_array = MLXVector(array)
-                    end
-                    TOut = fn_def.output_type(T)
-                    if TOut == Float32 # TODO fn.(array) may return a Float64 array for a Float32 array
-                        expected = TOut.(fn.(array))
-                    else
-                        expected = fn.(array)
-                    end
-                    actual = fn.(mlx_array)
-                    if TOut <: Integer
-                        @test actual == expected
-                    else
-                        @test actual ≈ expected
+                @testset "$fn.(::$MLXArray{$T})" begin
+                    for array_size in array_sizes
+                        N = length(array_size)
+                        @testset "$fn.(::$MLXArray{$T, $N}), $array_size" begin
+                            array = rand(T, array_size)
+                            array = fn_def.normalize(array, T)
+                            if N > 2 || N == 0
+                                mlx_array = MLXArray(array)
+                            elseif N > 1
+                                mlx_array = MLXMatrix(array)
+                            else
+                                mlx_array = MLXVector(array)
+                            end
+                            TOut = fn_def.output_type(T)
+                            if TOut == Float32 # TODO fn.(array) may return a Float64 array for a Float32 array
+                                expected = TOut.(fn.(array))
+                            else
+                                expected = fn.(array)
+                            end
+                            actual = fn.(mlx_array)
+                            if TOut <: Integer
+                                @test actual == expected
+                            else
+                                @test actual ≈ expected
+                            end
+                        end
                     end
                 end
             end
