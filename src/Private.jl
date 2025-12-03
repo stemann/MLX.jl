@@ -133,7 +133,7 @@ function get_unary_scalar_ops()
         ),
         :imag => (
             mlx_fn = Wrapper.mlx_imag,
-            TIn = Real, # testing segfaults wrt. Complex{<:AbstractFloat}
+            TIn = Real, # testing fails for imag wrt. Complex{<:AbstractFloat}
             output_type = return_input_type,
             preserves_type = true,
             normalize = (a, TIn) -> a,
