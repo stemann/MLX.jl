@@ -78,7 +78,7 @@ function Base.permutedims(
 end
 
 for (fn, fn_def) in Private.get_unary_scalar_ops()
-    TOut = fn_def.output_type(fn_def.TIn)
+    TOut = fn_def.output_type(fn_def.TIn) # TODO unused TOut; runtime inspection needed?
 
     @eval function Broadcast.broadcasted(
         ::Broadcast.ArrayStyle{MLXArray}, ::typeof($fn), a::MLXArray{T, N}
@@ -89,7 +89,8 @@ for (fn, fn_def) in Private.get_unary_scalar_ops()
         @static if $(fn_def.preserves_type)
             return MLXArray{T, N}(result_ref[])
         else
-            return MLXArray{$TOut, N}(result_ref[])
+            T_result = convert(Number, Wrapper.mlx_array_dtype(result_ref[])) # TODO unused TOut; runtime inspection needed?
+            return MLXArray{T_result, N}(result_ref[])
         end
     end
 end
