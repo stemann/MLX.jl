@@ -185,7 +185,7 @@ end
 function Base.Broadcast.materialize(
     bc::Broadcast.Broadcasted{Broadcast.ArrayStyle{MLXArray}}
 )
-    result = copy(Broadcast.instantiate(bc))
+    result = copy(Broadcast.instantiate(bc)) # CanonicalIndexError: setindex! not defined for MLXArray{ComplexF32, 0} for `abs.(MLXArray(fill(one(ComplexF32))))`
     if iszero(ndims(result)) # Drop 0-dim arrays to scalars, cf. https://github.com/JuliaLang/julia/issues/28866
         return result[]
     end
