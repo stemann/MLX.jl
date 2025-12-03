@@ -36,10 +36,10 @@ function get_unary_scalar_ops()
         ),
         :asin => (
             mlx_fn = Wrapper.mlx_arcsin,
-            TIn = AbstractFloat, # in testing, asin differs from mlx_arcsin wrt. Integer, normalize fails for Complex{<:AbstractFloat}
+            TIn = Union{AbstractFloat, Complex}, # in testing, asin differs from mlx_arcsin wrt. Integer
             output_type = return_input_type,
             preserves_type = true,
-            normalize = (a, TIn) -> TIn.(floor.(a ./ maximum(a))),
+            normalize = (a, TIn) -> TIn <: Real ? TIn.(floor.(a ./ maximum(a))) : a,
         ),
         :asinh => (
             mlx_fn = Wrapper.mlx_arcsinh,
@@ -57,10 +57,10 @@ function get_unary_scalar_ops()
         ),
         :atanh => (
             mlx_fn = Wrapper.mlx_arctanh,
-            TIn = AbstractFloat, # in testing, atanh differs from mlx_arctanh wrt. Integer, normalize fails for Complex{<:AbstractFloat}
+            TIn = AbstractFloat, # in testing, atanh differs from mlx_arctanh wrt. Integer
             output_type = return_float_type,
             preserves_type = false,
-            normalize = (a, TIn) -> TIn.(floor.(a ./ maximum(a))),
+            normalize = (a, TIn) -> TIn <: Real ? TIn.(floor.(a ./ maximum(a))) : a,
         ),
         # mlx_atleast_1d
         # mlx_atleast_2d
