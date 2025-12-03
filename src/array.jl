@@ -8,39 +8,6 @@ mutable struct MLXArray{T, N} <: AbstractArray{T, N}
     end
 end
 
-function Base.convert(::Type{Wrapper.mlx_dtype}, type::Type{<:Number})
-    if type == Bool
-        return Wrapper.MLX_BOOL
-    elseif type == UInt8
-        return Wrapper.MLX_UINT8
-    elseif type == UInt16
-        return Wrapper.MLX_UINT16
-    elseif type == UInt32
-        return Wrapper.MLX_UINT32
-    elseif type == UInt64
-        return Wrapper.MLX_UINT64
-    elseif type == Int8
-        return Wrapper.MLX_INT8
-    elseif type == Int16
-        return Wrapper.MLX_INT16
-    elseif type == Int32
-        return Wrapper.MLX_INT32
-    elseif type == Int64
-        return Wrapper.MLX_INT64
-    elseif type == Float16
-        return Wrapper.MLX_FLOAT16
-    elseif type == Float32
-        return Wrapper.MLX_FLOAT32
-    elseif type == Float64
-        return Wrapper.MLX_FLOAT64
-        # TODO Handle Wrapper.MLX_BFLOAT16
-    elseif type == ComplexF32
-        return Wrapper.MLX_COMPLEX64 # MLX_COMPLEX64 is a complex of Float32
-    else
-        throw(ArgumentError("Unsupported type: $type"))
-    end
-end
-
 function MLXArray{T, N}(array::AbstractArray{T, N}) where {T, N}
     is_column_major =
         storage_order(array; preferred_order = ArrayStorageOrderRow) ==
@@ -66,6 +33,27 @@ MLXMatrix(array::AbstractMatrix{T}) where {T} = MLXMatrix{T}(array)
 
 const MLXVecOrMat{T} = Union{MLXVector{T}, MLXMatrix{T}}
 
+# UndefInitializer
+
+function MLXArray{T, N}(::UndefInitializer, dims::Dims{N}) where {T, N}
+    stream = get_stream()
+    result_ref = Ref(Wrapper.mlx_array_new())
+    shape = collect(Cint.(dims))
+    dtype = convert(Wrapper.mlx_dtype, T)
+    Wrapper.mlx_zeros(result_ref, pointer(shape), Cint(N), dtype, stream.mlx_stream)
+    return MLXArray{T, N}(result_ref[])
+end
+
+function MLXArray{T}(::UndefInitializer, dims::Dims{N}) where {T, N}
+    return MLXArray{T, N}(undef, dims)
+end
+
+# BitArray
+
+MLXArray{Bool, N}(array::BitArray{N}) where {N} = MLXArray(Array{Bool}(array))
+
+MLXArray(array::BitArray{N}) where {N} = MLXArray{Bool, N}(array)
+
 # AbstractArray interface, cf. https://docs.julialang.org/en/v1/manual/interfaces/#man-interface-array
 
 function Base.size(array::MLXArray)
@@ -87,6 +75,13 @@ Base.getindex(array::MLXArray, i::Int) = getindex(unsafe_wrap(array), i)
 function Base.setindex!(array::MLXArray{T, N}, v::T, i::Int) where {T, N}
     setindex!(unsafe_wrap(array), v, i)
     return array
+end
+
+function Base.similar(array::MLXArray{T, N}, ::Type{T}, ::Dims{N}) where {T, N}
+    stream = get_stream()
+    result_ref = Ref(Wrapper.mlx_array_new())
+    Wrapper.mlx_zeros_like(result_ref, array.mlx_array, stream.mlx_stream)
+    return MLXArray{T, N}(result_ref[])
 end
 
 # Strided array interface, cf. https://docs.julialang.org/en/v1/manual/interfaces/#man-interface-strided-arrays
@@ -163,4 +158,36 @@ function Base.unsafe_wrap(array::MLXArray{T, N}) where {T, N}
     else
         return PermutedDimsArray(wrapped_array, reverse(1:ndims(array)))
     end
+end
+
+# Broadcasting interface, cf. https://docs.julialang.org/en/v1/manual/interfaces/#man-interfaces-broadcasting
+
+Base.BroadcastStyle(::Type{<:MLXArray}) = Broadcast.ArrayStyle{MLXArray}()
+
+function Base.similar(
+    bc::Broadcast.Broadcasted{Broadcast.ArrayStyle{MLXArray}}, ::Type{TElement}
+) where {TElement}
+    first_mlx_array(bc::Broadcast.Broadcasted) = first_mlx_array(bc.args)
+    function first_mlx_array(args::Tuple)
+        return first_mlx_array(first_mlx_array(args[1]), Base.tail(args))
+    end
+    first_mlx_array(x) = x
+    first_mlx_array(::Tuple{}) = nothing
+    first_mlx_array(a::MLXArray, _) = a
+    first_mlx_array(::Any, rest) = first_mlx_array(rest)
+    mlx_array = first_mlx_array(bc)
+    if isnothing(mlx_array)
+        return similar(MLXArray{TElement}, ())
+    end
+    return similar(mlx_array)
+end
+
+function Base.Broadcast.materialize(
+    bc::Broadcast.Broadcasted{Broadcast.ArrayStyle{MLXArray}}
+)
+    result = copy(Broadcast.instantiate(bc)) # CanonicalIndexError: setindex! not defined for MLXArray{ComplexF32, 0} for `abs.(MLXArray(fill(one(ComplexF32))))`
+    if iszero(ndims(result)) # Drop 0-dim arrays to scalars, cf. https://github.com/JuliaLang/julia/issues/28866
+        return result[]
+    end
+    return result
 end
