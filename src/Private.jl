@@ -163,31 +163,31 @@ function get_unary_scalar_ops()
         # mlx_isposinf
         :log => (
             mlx_fn = Wrapper.mlx_log,
-            TIn = Real, # Complex{<:AbstractFloat} fails: MethodError: no method matching isless(::ComplexF32, ::Float32)
+            TIn = Number,
             output_type = return_float_type,
             preserves_type = false,
-            normalize = (a, TIn) -> TIn.(ceil.(max.(eps(Float32), a))),
+            normalize = (a, TIn) -> TIn <: Real ? TIn.(ceil.(max.(eps(Float32), a))) : a,
         ),
         :log10 => (
             mlx_fn = Wrapper.mlx_log10,
-            TIn = Real, # Complex{<:AbstractFloat} fails: MethodError: no method matching isless(::ComplexF32, ::Float32)
+            TIn = Number,
             output_type = return_float_type,
             preserves_type = false,
-            normalize = (a, TIn) -> TIn.(ceil.(max.(eps(Float32), a))),
+            normalize = (a, TIn) -> TIn <: Real ? TIn.(ceil.(max.(eps(Float32), a))) : a,
         ),
         :log1p => (
             mlx_fn = Wrapper.mlx_log1p,
-            TIn = Real, # Complex{<:AbstractFloat} fails: MethodError: no method matching isless(::ComplexF32, ::Float32)
+            TIn = Real, # test fails for Complex{<:AbstractFloat}
             output_type = return_float_type,
             preserves_type = false,
-            normalize = (a, TIn) -> TIn.(ceil.(max.(eps(Float32), a))),
+            normalize = (a, TIn) -> TIn <: Real ? TIn.(ceil.(max.(eps(Float32), a))) : a,
         ),
         :log2 => (
             mlx_fn = Wrapper.mlx_log2,
-            TIn = Real, # Complex{<:AbstractFloat} fails: MethodError: no method matching isless(::ComplexF32, ::Float32)
+            TIn = Real, # test fails for Complex{<:AbstractFloat}
             output_type = return_float_type,
             preserves_type = false,
-            normalize = (a, TIn) -> TIn.(ceil.(max.(eps(Float32), a))),
+            normalize = (a, TIn) -> TIn <: Real ? TIn.(ceil.(max.(eps(Float32), a))) : a,
         ),
         :! => (
             mlx_fn = Wrapper.mlx_logical_not,
@@ -251,10 +251,10 @@ function get_unary_scalar_ops()
         ),
         :sqrt => (
             mlx_fn = Wrapper.mlx_sqrt,
-            TIn = Real, # Complex{<:AbstractFloat} fails: MethodError: no method matching isless(::ComplexF32, ::Float32)
+            TIn = Number,
             output_type = return_float_type,
             preserves_type = false,
-            normalize = (a, TIn) -> TIn.(ceil.(max.(eps(Float32), a))),
+            normalize = (a, TIn) -> TIn <: Real ? TIn.(ceil.(max.(eps(Float32), a))) : a,
         ),
         # mlx_square
         # mlx_stop_gradient
