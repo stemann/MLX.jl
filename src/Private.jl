@@ -112,14 +112,14 @@ function get_unary_scalar_ops()
         # mlx_erfinv
         :exp => (
             mlx_fn = Wrapper.mlx_exp,
-            TIn = Real, # testing fails for exp wrt. Complex{<:AbstractFloat}. TODO: Needs broadcast across Float32 and ComplexF32: `copyto!(dest::MLXArray{Float32, 3}, bc::Base.Broadcast.Broadcasted{Nothing, Tuple{Base.OneTo{Int64}, Base.OneTo{Int64}, Base.OneTo{Int64}}, typeof(-), Tuple{MLXArray{Float32, 3}, Array{ComplexF32, 3}}})`
+            TIn = Number,
             output_type = return_float_type,
             preserves_type = false,
             normalize = (a, TIn) -> a,
         ),
         :expm1 => (
             mlx_fn = Wrapper.mlx_expm1,
-            TIn = Real, # testing fails for expm1 wrt. Complex{<:AbstractFloat}. TODO: Needs broadcast across Float32 and ComplexF32
+            TIn = Real, # testing fails for expm1 wrt. Complex{<:AbstractFloat}
             output_type = return_float_type,
             preserves_type = false,
             normalize = (a, TIn) -> a,
@@ -206,7 +206,7 @@ function get_unary_scalar_ops()
         # mlx_ones_like
         :deg2rad => (
             mlx_fn = Wrapper.mlx_radians,
-            TIn = Real, # testing fails for deg2rad wrt. Complex{<:AbstractFloat}. TODO: Needs broadcast across Float32 and ComplexF32
+            TIn = Number,
             output_type = return_float_type,
             preserves_type = false,
             normalize = (a, TIn) -> a,
@@ -220,7 +220,7 @@ function get_unary_scalar_ops()
         ),
         :inv => (
             mlx_fn = Wrapper.mlx_reciprocal, # TODO check if this is correct, notably wrt. mlx_linalg_inv
-            TIn = Real, # testing fails for inv wrt. Complex{<:AbstractFloat}. TODO: Needs broadcast across Float32 and ComplexF32
+            TIn = Number,
             output_type = return_float_type,
             preserves_type = false,
             normalize = (a, TIn) -> a,
@@ -244,7 +244,7 @@ function get_unary_scalar_ops()
         ),
         :sinh => (
             mlx_fn = Wrapper.mlx_sinh,
-            TIn = Real, # testing fails for cosh wrt. Complex{<:AbstractFloat}. TODO: Needs broadcast across Float32 and ComplexF32
+            TIn = Number,
             output_type = return_float_type,
             preserves_type = false,
             normalize = (a, TIn) -> a,
@@ -267,7 +267,7 @@ function get_unary_scalar_ops()
         ),
         :tanh => (
             mlx_fn = Wrapper.mlx_tanh,
-            TIn = Real, # testing fails for tanh wrt. Complex{<:AbstractFloat}. TODO: Needs broadcast across Float32 and ComplexF32
+            TIn = Number,
             output_type = return_float_type,
             preserves_type = false,
             normalize = (a, TIn) -> a,
