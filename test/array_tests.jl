@@ -1,7 +1,18 @@
+@static if VERSION < v"1.11"
+    using ScopedValues
+else
+    using Base.ScopedValues
+end
+
 using MLX
 using Test
 
 @testset "MLXArray" begin
+    device_types = [MLX.DeviceTypeCPU]
+    if MLX.metal_is_available()
+        push!(device_types, MLX.DeviceTypeGPU)
+    end
+
     @test IndexStyle(MLXArray) == IndexLinear()
 
     array_sizes = [(), (1,), (2,), (1, 1), (2, 1), (3, 2), (4, 3, 2)]
@@ -35,30 +46,33 @@ using Test
         end
     end
     @testset "Strided array interface" begin
-        element_types = MLX.supported_number_types(MLX.DeviceTypeGPU) # TODO Excluding Float64
+        for device_type in device_types,
+            T in MLX.supported_number_types(device_type),
+            array_size in array_sizes
 
-        for T in element_types, array_size in array_sizes
             N = length(array_size)
-            @testset "$MLXArray{$T, $N}, array_size=$array_size" begin
-                array = ones(T, array_size)
-                mlx_array = MLXArray(array)
+            @testset "$MLXArray{$T, $N}, array_size=$array_size, $device_type" begin
+                with(MLX.device => MLX.Device(; device_type)) do
+                    array = ones(T, array_size)
+                    mlx_array = MLXArray(array)
 
-                if N > 0
-                    @test strides(mlx_array) ==
-                        reverse(strides(permutedims(array, reverse(1:ndims(array)))))
-                else
-                    @test strides(mlx_array) == strides(array)
+                    if N > 0
+                        @test strides(mlx_array) ==
+                            reverse(strides(permutedims(array, reverse(1:ndims(array)))))
+                    else
+                        @test strides(mlx_array) == strides(array)
+                    end
+                    @test Base.unsafe_convert(Ptr{T}, mlx_array) isa Ptr{T}
+                    @test unsafe_wrap(mlx_array) == array
+                    @test Base.elsize(mlx_array) == Base.elsize(array)
+
+                    another_mlx_array = MLXArray(mlx_array)
+                    @test another_mlx_array == mlx_array
+                    @test strides(another_mlx_array) == strides(mlx_array)
                 end
-                @test Base.unsafe_convert(Ptr{T}, mlx_array) isa Ptr{T}
-                @test unsafe_wrap(mlx_array) == array
-                @test Base.elsize(mlx_array) == Base.elsize(array)
-
-                another_mlx_array = MLXArray(mlx_array)
-                @test another_mlx_array == mlx_array
-                @test strides(another_mlx_array) == strides(mlx_array)
             end
         end
-        for T in element_types
+        for T in MLX.supported_number_types()
             @test Base.elsize(MLXArray{T, 0}) == Base.elsize(Array{T, 0})
         end
     end
