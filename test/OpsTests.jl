@@ -56,6 +56,43 @@ using .TestUtils
             @test permutedims(mlx_array) == permutedims(array)
         end
     end
+
+    # Integers from a small range, so they are exactly representable as Float32 inputs
+    test_values(T) =
+        T <: Integer && T != Bool ? (T <: Signed ? (T(-10):T(10)) : (T(0):T(10))) : T
+
+    # MLX computes some Float64 functions with about Float32 precision
+    rtol = sqrt(eps(Float32))
+
+    for (fn_symbol, fn_def) in MLX.Private.get_unary_scalar_ops()
+        fn = eval(fn_symbol)
+        function input_types(device_type)
+            return filter(T -> T <: fn_def.TIn, MLX.supported_number_types(device_type))
+        end
+
+        testset_foreach(
+            "$fn.(::MLXArray)"; element_types = input_types, array_sizes
+        ) do T, array_size
+            N = length(array_size)
+            array = fn_def.normalize(rand(test_values(T), array_size), T)
+            if N == 0 # Broadcasting over a 0-dimensional Array yields a scalar
+                array = fill(only(array))
+            end
+            TOut = fn_def.output_type(T)
+            # Julia returns Float64 for integers, MLX Float32
+            expected = TOut == Float32 ? TOut.(fn.(array)) : fn.(array)
+            actual = fn.(to_mlx(array))
+            @test actual isa (N == 0 ? MLXNumber{TOut} : MLXArray{TOut, N})
+            @test convert(Number, MLX.Wrapper.mlx_array_dtype(actual)) == TOut
+            if TOut <: Integer
+                @test actual == expected
+            elseif N == 0
+                @test isapprox(TOut(actual), expected; rtol)
+            else
+                @test isapprox(actual, expected; rtol)
+            end
+        end
+    end
 end
 
 end

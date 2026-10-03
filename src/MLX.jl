@@ -10,6 +10,8 @@ export MLXArray, MLXException, MLXMatrix, MLXNumber, MLXVecOrMat, MLXVector
 
 include(joinpath(@__DIR__, "Wrapper.jl"))
 
+include(joinpath(@__DIR__, "Private.jl"))
+
 include(joinpath(@__DIR__, "utils.jl"))
 
 include(joinpath(@__DIR__, "array.jl"))

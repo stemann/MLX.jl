@@ -103,3 +103,15 @@ function Base.permutedims(a::MLXArray{T, N}, perm) where {T, N}
 end
 
 Base.permutedims(m::MLXMatrix) = permutedims(m, (2, 1))
+
+for (fn, fn_def) in Private.get_unary_scalar_ops()
+    @eval function Broadcast.broadcasted(
+        ::Broadcast.ArrayStyle{MLXArray}, ::typeof($fn), a::MLXArray{T, N}
+    ) where {T <: $(fn_def.TIn), N}
+        s = get_stream()
+        result_ref = Ref(Wrapper.mlx_array_new())
+        $(fn_def.mlx_fn)(result_ref, a, s)
+        result = MLXArray{$(fn_def.output_type)(T), N}(result_ref[])
+        return N == 0 ? MLXNumber(result) : result # As materialize for 0-dim results
+    end
+end
