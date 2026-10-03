@@ -66,6 +66,24 @@ MLXMatrix(array::AbstractMatrix{T}) where {T} = MLXMatrix{T}(array)
 
 const MLXVecOrMat{T} = Union{MLXVector{T}, MLXMatrix{T}}
 
+# UndefInitializer
+
+function MLXArray{T, N}(::UndefInitializer, dims::Dims{N}) where {T, N}
+    stream = get_stream()
+    result_ref = Ref(Wrapper.mlx_array_new())
+    shape = collect(Cint.(dims))
+    dtype = convert(Wrapper.mlx_dtype, T)
+    # MLX provides no uninitialized allocation, so undef arrays are zero-filled
+    GC.@preserve shape Wrapper.mlx_zeros(
+        result_ref, pointer(shape), Cint(N), dtype, stream.mlx_stream
+    )
+    return MLXArray{T, N}(result_ref[])
+end
+
+function MLXArray{T}(::UndefInitializer, dims::Dims{N}) where {T, N}
+    return MLXArray{T, N}(undef, dims)
+end
+
 # AbstractArray interface, cf. https://docs.julialang.org/en/v1/manual/interfaces/#man-interface-array
 
 function Base.size(array::MLXArray)
@@ -87,6 +105,10 @@ Base.getindex(array::MLXArray, i::Int) = getindex(unsafe_wrap(array), i)
 function Base.setindex!(array::MLXArray{T, N}, v::T, i::Int) where {T, N}
     setindex!(unsafe_wrap(array), v, i)
     return array
+end
+
+function Base.similar(::MLXArray, ::Type{T}, dims::Dims{N}) where {T, N}
+    return MLXArray{T, N}(undef, dims)
 end
 
 # Strided array interface, cf. https://docs.julialang.org/en/v1/manual/interfaces/#man-interface-strided-arrays

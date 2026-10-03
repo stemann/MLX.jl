@@ -45,6 +45,74 @@ using Test
             end
         end
     end
+    @testset "UndefInitializer" begin
+        for device_type in device_types,
+            T in MLX.supported_number_types(device_type),
+            array_size in array_sizes
+
+            N = length(array_size)
+            @testset "$MLXArray{$T, $N}, array_size=$array_size, $device_type" begin
+                with(MLX.device => MLX.Device(; device_type)) do
+                    @testset "MLXArray{T, N}(undef, dims)" begin
+                        mlx_array = MLXArray{T, N}(undef, array_size)
+                        @test mlx_array isa MLXArray{T, N}
+                        @test size(mlx_array) == array_size
+                    end
+                    @testset "MLXArray{T}(undef, dims)" begin
+                        mlx_array = MLXArray{T}(undef, array_size)
+                        @test mlx_array isa MLXArray{T, N}
+                        @test size(mlx_array) == array_size
+                    end
+                end
+            end
+        end
+    end
+    @testset "similar" begin
+        other_dims = (3, 2)
+
+        for device_type in device_types,
+            T in MLX.supported_number_types(device_type),
+            array_size in array_sizes
+
+            N = length(array_size)
+            S = T == Float32 ? Int32 : Float32 # Ensure S != T
+            @testset "$MLXArray{$T, $N}, array_size=$array_size, $device_type" begin
+                with(MLX.device => MLX.Device(; device_type)) do
+                    @testset "similar(::Type{MLXArray{T}}, dims)" begin
+                        result = similar(MLXArray{T}, array_size)
+                        @test result isa MLXArray{T, N}
+                        @test size(result) == array_size
+                    end
+
+                    mlx_array = MLXArray(ones(T, array_size))
+                    @testset "similar(a)" begin
+                        result = similar(mlx_array)
+                        @test result isa MLXArray{T, N}
+                        @test size(result) == array_size
+                        @test pointer(result) != pointer(mlx_array)
+                    end
+                    @testset "similar(a, S)" begin
+                        result = similar(mlx_array, S)
+                        @test result isa MLXArray{S, N}
+                        @test size(result) == array_size
+                        @test pointer(result) != pointer(mlx_array)
+                    end
+                    @testset "similar(a, dims)" begin
+                        result = similar(mlx_array, other_dims)
+                        @test result isa MLXArray{T, length(other_dims)}
+                        @test size(result) == other_dims
+                        @test pointer(result) != pointer(mlx_array)
+                    end
+                    @testset "similar(a, S, dims)" begin
+                        result = similar(mlx_array, S, other_dims)
+                        @test result isa MLXArray{S, length(other_dims)}
+                        @test size(result) == other_dims
+                        @test pointer(result) != pointer(mlx_array)
+                    end
+                end
+            end
+        end
+    end
     @testset "Strided array interface" begin
         for device_type in device_types,
             T in MLX.supported_number_types(device_type),
