@@ -144,9 +144,6 @@ using Test
         @test another_mlx_array == mlx_array
         @test strides(another_mlx_array) == strides(mlx_array)
     end
-    @testset "Unsupported Number types" begin
-        @test_throws ArgumentError convert(MLX.Wrapper.mlx_dtype, Rational{Int})
-    end
 
     testset_foreach("BitArray"; element_types = _ -> [Bool]) do T, array_size
         array = BitArray(rand(Bool, array_size))

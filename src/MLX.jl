@@ -16,6 +16,7 @@ include(joinpath(@__DIR__, "array.jl"))
 include(joinpath(@__DIR__, "device.jl"))
 include(joinpath(@__DIR__, "error_handling.jl"))
 include(joinpath(@__DIR__, "metal.jl"))
+include(joinpath(@__DIR__, "number_types.jl"))
 include(joinpath(@__DIR__, "stream.jl"))
 
 function __init__()
