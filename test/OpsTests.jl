@@ -92,6 +92,24 @@ using .TestUtils
                 @test isapprox(actual, expected; rtol)
             end
         end
+
+        testset_foreach_type("$fn(::MLXNumber)"; element_types = input_types) do T
+            value = only(fn_def.normalize([rand(test_values(T))], T))
+            TOut = fn_def.output_type(T)
+            expected = fn(value)
+            actual = fn(MLXNumber(value))
+            if fn in (isfinite, isinf, isnan)
+                @test actual === expected
+            else
+                @test actual isa MLXNumber{TOut}
+                @test convert(Number, MLX.Wrapper.mlx_array_dtype(actual)) == TOut
+                if TOut <: Integer
+                    @test actual == expected
+                else
+                    @test isapprox(TOut(actual), expected; rtol)
+                end
+            end
+        end
     end
 end
 

@@ -115,3 +115,13 @@ for (fn, fn_def) in Private.get_unary_scalar_ops()
         return N == 0 ? MLXNumber(result) : result # As materialize for 0-dim results
     end
 end
+
+for (fn, fn_def) in Private.get_unary_scalar_ops()
+    if fn in (:isfinite, :isinf, :isnan)
+        # Predicates evaluate, as comparisons, so they can be used for control flow
+        @eval Base.$fn(x::MLXNumber{T}) where {T <: $(fn_def.TIn)} = Bool($fn.(x.array)[])
+    else
+        @eval Base.$fn(x::MLXNumber{T}) where {T <: $(fn_def.TIn)} =
+            MLXNumber($fn.(x.array))
+    end
+end
