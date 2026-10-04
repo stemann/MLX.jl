@@ -1,53 +1,14 @@
 module ArrayTests
 
-@static if VERSION < v"1.11"
-    using ScopedValues
-else
-    using Base.ScopedValues
-end
-
 using MLX
 using Random
 using Test
 
+include(joinpath(@__DIR__, "TestUtils.jl"))
+using .TestUtils
+
 @testset "MLXArray" begin
     Random.seed!(42)
-
-    device_types = [MLX.DeviceTypeCPU]
-    if MLX.metal_is_available()
-        push!(device_types, MLX.DeviceTypeGPU)
-    end
-
-    array_sizes = [(), (1,), (2,), (1, 1), (2, 1), (3, 2), (4, 3, 2)]
-
-    # Calls f(T, array_size) in a test set named name, with nested test sets per device,
-    # element type and array size
-    function testset_foreach(f, name; element_types = MLX.supported_number_types)
-        @testset "$name" begin
-            @testset "$name, $device_type" for device_type in device_types
-                with(MLX.device => MLX.Device(; device_type)) do
-                    prefix = "$name, $device_type"
-                    @testset "$prefix, $MLXArray{$T}" for T in element_types(device_type)
-                        for array_size in array_sizes
-                            N = length(array_size)
-                            @testset "$prefix, $MLXArray{$T, $N}, array_size=$array_size" begin
-                                f(T, array_size)
-                            end
-                        end
-                    end
-                end
-            end
-        end
-    end
-
-    function to_mlx(array::AbstractArray)
-        if ndims(array) == 1
-            return MLXVector(array)
-        elseif ndims(array) == 2
-            return MLXMatrix(array)
-        end
-        return MLXArray(array)
-    end
 
     @testset "AbstractArray interface" begin
         testset_foreach("Type parameters") do T, array_size

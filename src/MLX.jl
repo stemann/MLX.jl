@@ -6,7 +6,7 @@ else
     using Base.ScopedValues
 end
 
-export MLXArray, MLXException, MLXMatrix, MLXVecOrMat, MLXVector
+export MLXArray, MLXException, MLXMatrix, MLXNumber, MLXVecOrMat, MLXVector
 
 include(joinpath(@__DIR__, "Wrapper.jl"))
 
@@ -16,6 +16,7 @@ include(joinpath(@__DIR__, "array.jl"))
 include(joinpath(@__DIR__, "device.jl"))
 include(joinpath(@__DIR__, "error_handling.jl"))
 include(joinpath(@__DIR__, "metal.jl"))
+include(joinpath(@__DIR__, "number.jl"))
 include(joinpath(@__DIR__, "number_types.jl"))
 include(joinpath(@__DIR__, "stream.jl"))
 
