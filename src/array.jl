@@ -8,6 +8,11 @@ mutable struct MLXArray{T, N} <: AbstractArray{T, N}
     end
 end
 
+# ccall keeps the result of cconvert (the MLXArray) alive during the call,
+# so its finalizer cannot free the mlx_array that unsafe_convert passes to C
+Base.cconvert(::Type{Wrapper.mlx_array}, array::MLXArray) = array
+Base.unsafe_convert(::Type{Wrapper.mlx_array}, array::MLXArray) = array.mlx_array
+
 function Base.convert(::Type{Wrapper.mlx_dtype}, type::Type{<:Number})
     if type == Bool
         return Wrapper.MLX_BOOL
@@ -48,9 +53,7 @@ function MLXArray{T, N}(array::AbstractArray{T, N}) where {T, N}
     array_row_major = is_column_major ? permutedims(array, reverse(1:ndims(array))) : array
     shape = collect(Cint.(size(array)))
     dtype = convert(Wrapper.mlx_dtype, T)
-    mlx_array = GC.@preserve array_row_major shape Wrapper.mlx_array_new_data(
-        pointer(array_row_major), pointer(shape), Cint(N), dtype
-    )
+    mlx_array = Wrapper.mlx_array_new_data(array_row_major, shape, Cint(N), dtype)
     return MLXArray{T, N}(mlx_array)
 end
 
@@ -74,9 +77,7 @@ function MLXArray{T, N}(::UndefInitializer, dims::Dims{N}) where {T, N}
     shape = collect(Cint.(dims))
     dtype = convert(Wrapper.mlx_dtype, T)
     # MLX provides no uninitialized allocation, so undef arrays are zero-filled
-    GC.@preserve shape Wrapper.mlx_zeros(
-        result_ref, pointer(shape), Cint(N), dtype, stream.mlx_stream
-    )
+    Wrapper.mlx_zeros(result_ref, shape, Cint(N), dtype, stream)
     return MLXArray{T, N}(result_ref[])
 end
 
@@ -87,12 +88,10 @@ end
 # AbstractArray interface, cf. https://docs.julialang.org/en/v1/manual/interfaces/#man-interface-array
 
 function Base.size(array::MLXArray)
-    return Tuple(
+    return GC.@preserve array Tuple(
         Int.(
             unsafe_wrap(
-                Vector{Cint},
-                Wrapper.mlx_array_shape(array.mlx_array),
-                Wrapper.mlx_array_ndim(array.mlx_array),
+                Vector{Cint}, Wrapper.mlx_array_shape(array), Wrapper.mlx_array_ndim(array)
             ),
         ),
     )
@@ -100,10 +99,10 @@ end
 
 Base.IndexStyle(::Type{<:MLXArray}) = IndexLinear()
 
-Base.getindex(array::MLXArray, i::Int) = getindex(unsafe_wrap(array), i)
+Base.getindex(array::MLXArray, i::Int) = GC.@preserve array getindex(unsafe_wrap(array), i)
 
 function Base.setindex!(array::MLXArray{T, N}, v::T, i::Int) where {T, N}
-    setindex!(unsafe_wrap(array), v, i)
+    GC.@preserve array setindex!(unsafe_wrap(array), v, i)
     return array
 end
 
@@ -114,12 +113,12 @@ end
 # Strided array interface, cf. https://docs.julialang.org/en/v1/manual/interfaces/#man-interface-strided-arrays
 
 function Base.strides(array::MLXArray)
-    array_strides = Tuple(
+    array_strides = GC.@preserve array Tuple(
         Int.(
             unsafe_wrap(
                 Vector{Csize_t},
-                Wrapper.mlx_array_strides(array.mlx_array),
-                Wrapper.mlx_array_ndim(array.mlx_array),
+                Wrapper.mlx_array_strides(array),
+                Wrapper.mlx_array_ndim(array),
             ),
         ),
     )
@@ -164,14 +163,14 @@ function Base.unsafe_convert(::Type{Ptr{T}}, array::MLXArray{T, N}) where {T, N}
         throw(ArgumentError("Unsupported type: $T"))
     end
 
-    Wrapper.mlx_array_eval(array.mlx_array)
-    return mlx_array_data(array.mlx_array)
+    Wrapper.mlx_array_eval(array)
+    return mlx_array_data(array)
 end
 
 Base.elsize(::Type{MLXArray{T, N}}) where {T, N} = sizeof(T)
 
 function Base.elsize(array::MLXArray{T, N}) where {T, N}
-    return Int(Wrapper.mlx_array_itemsize(array.mlx_array))
+    return Int(Wrapper.mlx_array_itemsize(array))
 end
 
 function Base.unsafe_wrap(array::MLXArray{T, N}) where {T, N}

@@ -38,6 +38,11 @@ mutable struct Device
     end
 end
 
+# ccall keeps the result of cconvert (the Device) alive during the call,
+# so its finalizer cannot free the mlx_device that unsafe_convert passes to C
+Base.cconvert(::Type{Wrapper.mlx_device}, device::Device) = device
+Base.unsafe_convert(::Type{Wrapper.mlx_device}, device::Device) = device.mlx_device
+
 function Device(; device_type = DeviceTypeCPU, index::Int = 0)
     mlx_device_type = Wrapper.mlx_device_type(UInt32(device_type))
     mlx_device = Wrapper.mlx_device_new_type(mlx_device_type, index)
@@ -47,11 +52,11 @@ end
 function Base.getproperty(device::Device, name::Symbol)
     if name == :index
         index = Ref(Cint(-1))
-        Wrapper.mlx_device_get_index(index, device.mlx_device)
+        Wrapper.mlx_device_get_index(index, device)
         return Int(index[])
     elseif name == :type
         mlx_device_type = Ref{Wrapper.mlx_device_type}()
-        Wrapper.mlx_device_get_type(mlx_device_type, device.mlx_device)
+        Wrapper.mlx_device_get_type(mlx_device_type, device)
         return DeviceType(UInt32(mlx_device_type[]))
     end
     return getfield(device, name)
@@ -66,7 +71,7 @@ function Base.setproperty!(::Device, name::Symbol, value)
     throw(ArgumentError("Field $name should not be set"))
 end
 
-Base.:(==)(a::Device, b::Device) = Wrapper.mlx_device_equal(a.mlx_device, b.mlx_device) == 1 # TODO mlx_device_equal should return Bool and not Cint
+Base.:(==)(a::Device, b::Device) = Wrapper.mlx_device_equal(a, b) == 1 # TODO mlx_device_equal should return Bool and not Cint
 
 function Base.show(io::IO, device::Device)
     print(io, "MLX.Device(; device_type = MLX.$(device.type), index = $(device.index))")
@@ -80,7 +85,7 @@ function default_device()
 end
 
 function set_default_device(device::Device)
-    Wrapper.mlx_set_default_device(device.mlx_device)
+    Wrapper.mlx_set_default_device(device)
     return nothing
 end
 

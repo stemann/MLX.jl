@@ -8,19 +8,24 @@ mutable struct Stream
     end
 end
 
+# ccall keeps the result of cconvert (the Stream) alive during the call,
+# so its finalizer cannot free the mlx_stream that unsafe_convert passes to C
+Base.cconvert(::Type{Wrapper.mlx_stream}, stream::Stream) = stream
+Base.unsafe_convert(::Type{Wrapper.mlx_stream}, stream::Stream) = stream.mlx_stream
+
 function Stream(dev::Device)
-    mlx_stream = Wrapper.mlx_stream_new_device(dev.mlx_device)
+    mlx_stream = Wrapper.mlx_stream_new_device(dev)
     return Stream(mlx_stream)
 end
 
 function Base.getproperty(stream::Stream, name::Symbol)
     if name == :device
         mlx_device = Ref(Wrapper.mlx_device_new())
-        Wrapper.mlx_stream_get_device(mlx_device, stream.mlx_stream)
+        Wrapper.mlx_stream_get_device(mlx_device, stream)
         return Device(mlx_device[])
     elseif name == :index
         index = Ref(Cint(-1))
-        Wrapper.mlx_stream_get_index(index, stream.mlx_stream)
+        Wrapper.mlx_stream_get_index(index, stream)
         return Int(index[])
     end
     return getfield(stream, name)
@@ -35,7 +40,7 @@ function Base.setproperty!(::Stream, name::Symbol, _)
     throw(ArgumentError("Field $name should not be set"))
 end
 
-Base.:(==)(a::Stream, b::Stream) = Wrapper.mlx_stream_equal(a.mlx_stream, b.mlx_stream)
+Base.:(==)(a::Stream, b::Stream) = Wrapper.mlx_stream_equal(a, b)
 
 function Base.show(io::IO, stream::Stream)
     print(io, "MLX.Stream($(stream.device); index = $(stream.index))")
@@ -43,18 +48,18 @@ function Base.show(io::IO, stream::Stream)
 end
 
 function synchronize!(stream::Stream)
-    Wrapper.mlx_synchronize(stream.mlx_stream)
+    Wrapper.mlx_synchronize(stream)
     return nothing
 end
 
 function default_stream(dev::Device)
     mlx_stream = Ref(Wrapper.mlx_stream_new())
-    Wrapper.mlx_get_default_stream(mlx_stream, dev.mlx_device)
+    Wrapper.mlx_get_default_stream(mlx_stream, dev)
     return Stream(mlx_stream[])
 end
 
 function set_default_stream(stream::Stream)
-    Wrapper.mlx_set_default_stream(stream.mlx_stream)
+    Wrapper.mlx_set_default_stream(stream)
     return nothing
 end
 
