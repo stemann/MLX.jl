@@ -1,8 +1,8 @@
 using Test
 
 @testset verbose = true "MLX" begin
-    include(joinpath(@__DIR__, "array_tests.jl"))
-    include(joinpath(@__DIR__, "device_tests.jl"))
-    include(joinpath(@__DIR__, "error_handling_tests.jl"))
-    include(joinpath(@__DIR__, "stream_tests.jl"))
+    include(joinpath(@__DIR__, "ArrayTests.jl"))
+    include(joinpath(@__DIR__, "DeviceTests.jl"))
+    include(joinpath(@__DIR__, "ErrorHandlingTests.jl"))
+    include(joinpath(@__DIR__, "StreamTests.jl"))
 end

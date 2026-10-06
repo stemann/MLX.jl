@@ -1,3 +1,5 @@
+module ArrayTests
+
 @static if VERSION < v"1.11"
     using ScopedValues
 else
@@ -150,4 +152,6 @@ using Test
         array = BitArray(rand(Bool, array_size))
         @test to_mlx(array) == array
     end
+end
+
 end

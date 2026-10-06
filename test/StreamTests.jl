@@ -1,3 +1,5 @@
+module StreamTests
+
 @static if VERSION < v"1.11"
     using ScopedValues
 else
@@ -86,4 +88,6 @@ using Test
             end
         end
     end
+end
+
 end
