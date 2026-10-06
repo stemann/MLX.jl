@@ -22,7 +22,7 @@ MLXNumber{T}(x::T) where {T <: Number} = MLXNumber{T}(MLXArray(fill(x)))
 MLXNumber{T}(x::Number) where {T} = MLXNumber{T}(T(x))
 # Both the above and the constructor for other Number types below match MLXNumber{T}(x::MLXNumber),
 # neither more specifically, so the following method is needed to avoid an ambiguity
-MLXNumber{T}(x::MLXNumber) where {T} = MLXNumber{T}(T(x))
+MLXNumber{T}(x::MLXNumber) where {T} = MLXNumber{T}(astype(T, x.array))
 MLXNumber{T}(x::MLXNumber{T}) where {T} = x
 # MLX has scalar constructors for some types
 for (T, mlx_fn) in (
@@ -45,6 +45,44 @@ MLXNumber(x::MLXNumber) = x
 # Constructor for other Number types, which also supports convert, cf.
 # https://docs.julialang.org/en/v1/manual/conversion-and-promotion/#Defining-New-Conversions
 (::Type{T})(x::MLXNumber) where {T <: Number} = T(x.array[])
+
+function Base.promote_rule(::Type{MLXNumber{T}}, ::Type{S}) where {T, S <: Number}
+    return MLXNumber{promote_type(T, S)}
+end
+
+function Base.promote_rule(::Type{MLXNumber{T}}, ::Type{MLXNumber{S}}) where {T, S}
+    return MLXNumber{promote_type(T, S)}
+end
+
+# Arithmetic
+
+function binary_op(mlx_fn, ::Type{R}, a::MLXNumber, b::MLXNumber) where {R}
+    a, b = convert(MLXNumber{R}, a), convert(MLXNumber{R}, b)
+    s = get_stream()
+    result_ref = Ref(Wrapper.mlx_array_new())
+    mlx_fn(result_ref, a, b, s)
+    return MLXNumber(MLXArray{R, 0}(result_ref[]))
+end
+
+for (op, mlx_fn) in ((:+, :mlx_add), (:-, :mlx_subtract), (:*, :mlx_multiply))
+    @eval function Base.$op(a::MLXNumber{T}, b::MLXNumber{T}) where {T}
+        return binary_op(Wrapper.$mlx_fn, Base.promote_op($op, T, T), a, b)
+    end
+end
+
+# As for the unary ops, integers are divided as Float32, not Float64
+function Base.:/(a::MLXNumber{T}, b::MLXNumber{T}) where {T}
+    return binary_op(Wrapper.mlx_divide, Private.return_float_type(T), a, b)
+end
+
+function Base.:-(x::MLXNumber{T}) where {T}
+    R = Base.promote_op(-, T)
+    x = convert(MLXNumber{R}, x)
+    s = get_stream()
+    result_ref = Ref(Wrapper.mlx_array_new())
+    Wrapper.mlx_negative(result_ref, x, s)
+    return MLXNumber(MLXArray{R, 0}(result_ref[]))
+end
 
 # isequal and isless are defined separately, as Julia defines them to differ from == and < for NaN
 # and -0.0

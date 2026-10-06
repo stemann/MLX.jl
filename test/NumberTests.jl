@@ -10,8 +10,12 @@ using .TestUtils
 @testset "MLXNumber" begin
     Random.seed!(42)
 
+    # Integers from a small range, so sums, differences and products do not overflow
     rand_value(T) =
         rand(T <: Integer && T != Bool ? (T <: Signed ? (T(-10):T(10)) : (T(0):T(10))) : T)
+    rand_nonzero_value(T) = (x = rand_value(T); iszero(x) ? one(T) : x)
+
+    rtol = sqrt(eps(Float32))
 
     mlx_dtype(x::MLXNumber) = convert(Number, MLX.Wrapper.mlx_array_dtype(x))
 
@@ -49,6 +53,37 @@ using .TestUtils
         @test zero(x) isa MLXNumber{T}
         @test T(zero(x)) == zero(T)
         @test T(one(x)) == one(T)
+    end
+
+    testset_foreach_type("Arithmetic") do T
+        a = rand_value(T)
+        b = rand_nonzero_value(T)
+        for op in (+, -, *, /)
+            expected = op(a, b)
+            R = op == (/) ? MLX.Private.return_float_type(T) : typeof(expected)
+            actual = op(MLXNumber(a), MLXNumber(b))
+            @test actual isa MLXNumber{R}
+            @test mlx_dtype(actual) == R
+            if R <: Integer
+                @test R(actual) == expected
+            else
+                @test isapprox(R(actual), R(expected); rtol)
+            end
+        end
+        expected = -a
+        actual = -MLXNumber(a)
+        @test actual isa MLXNumber{typeof(expected)}
+        @test mlx_dtype(actual) == typeof(expected)
+        @test typeof(expected)(actual) == expected
+    end
+
+    non_bool_types(device_type) = filter(!=(Bool), MLX.supported_number_types(device_type))
+    testset_foreach_type("Promotion"; element_types = non_bool_types) do T
+        a = rand_value(T)
+        @test MLXNumber(a) + true isa MLXNumber{T}
+        @test true + MLXNumber(a) isa MLXNumber{T}
+        @test MLXNumber(true) + MLXNumber(a) isa MLXNumber{T}
+        @test T(MLXNumber(a) + true) == a + true
     end
 
     testset_foreach_type("Equality and hashing") do T
