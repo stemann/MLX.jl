@@ -170,28 +170,32 @@ function get_unary_scalar_ops()
             TIn = Number,
             output_type = return_float_type,
             preserves_type = false,
-            normalize = (a, TIn) -> TIn <: Real ? TIn.(ceil.(max.(eps(Float32), a))) : a,
+            normalize = (a, TIn) ->
+                TIn <: Real ? TIn.(ceil.(max.(eps(Float32), a))) : a,
         ),
         :log10 => (
             mlx_fn = Wrapper.mlx_log10,
             TIn = Number,
             output_type = return_float_type,
             preserves_type = false,
-            normalize = (a, TIn) -> TIn <: Real ? TIn.(ceil.(max.(eps(Float32), a))) : a,
+            normalize = (a, TIn) ->
+                TIn <: Real ? TIn.(ceil.(max.(eps(Float32), a))) : a,
         ),
         :log1p => (
             mlx_fn = Wrapper.mlx_log1p,
             TIn = Real, # test fails for Complex{<:AbstractFloat}
             output_type = return_float_type,
             preserves_type = false,
-            normalize = (a, TIn) -> TIn <: Real ? TIn.(ceil.(max.(eps(Float32), a))) : a,
+            normalize = (a, TIn) ->
+                TIn <: Real ? TIn.(ceil.(max.(eps(Float32), a))) : a,
         ),
         :log2 => (
             mlx_fn = Wrapper.mlx_log2,
             TIn = Real, # test fails for Complex{<:AbstractFloat}
             output_type = return_float_type,
             preserves_type = false,
-            normalize = (a, TIn) -> TIn <: Real ? TIn.(ceil.(max.(eps(Float32), a))) : a,
+            normalize = (a, TIn) ->
+                TIn <: Real ? TIn.(ceil.(max.(eps(Float32), a))) : a,
         ),
         :! => (
             mlx_fn = Wrapper.mlx_logical_not,
@@ -258,7 +262,8 @@ function get_unary_scalar_ops()
             TIn = Number,
             output_type = return_float_type,
             preserves_type = false,
-            normalize = (a, TIn) -> TIn <: Real ? TIn.(ceil.(max.(eps(Float32), a))) : a,
+            normalize = (a, TIn) ->
+                TIn <: Real ? TIn.(ceil.(max.(eps(Float32), a))) : a,
         ),
         # mlx_square
         # mlx_stop_gradient
