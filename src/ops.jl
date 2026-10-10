@@ -1,7 +1,7 @@
 function Base.copy(a::MLXArray{T, N}) where {T, N}
     s = get_stream()
     result = Ref(Wrapper.mlx_array_new())
-    Wrapper.mlx_copy(result, a.mlx_array, s.mlx_stream)
+    Wrapper.mlx_copy(result, a, s)
     return MLXArray{T, N}(result[])
 end
 
@@ -17,13 +17,13 @@ function Base.dropdims(
     s = get_stream()
     result = Ref(Wrapper.mlx_array_new())
     if isnothing(dims)
-        Wrapper.mlx_squeeze_all(result, a.mlx_array, s.mlx_stream)
+        Wrapper.mlx_squeeze_all(result, a, s)
     else
         if dims isa Integer
             dims = Dims(dims)
         end
         axes = collect(Cint.(dims) .- one(Cint))
-        Wrapper.mlx_squeeze(result, a.mlx_array, axes, length(axes), s.mlx_stream)
+        Wrapper.mlx_squeeze(result, a, axes, length(axes), s)
     end
     remaining_dims = Int(Wrapper.mlx_array_ndim(result[]))
     return MLXArray{T, remaining_dims}(result[])
@@ -32,7 +32,7 @@ end
 function Base.sort(v::MLXVector{T}) where {T}
     s = get_stream()
     result = Ref(Wrapper.mlx_array_new())
-    Wrapper.mlx_sort_all(result, v.mlx_array, s.mlx_stream)
+    Wrapper.mlx_sort_all(result, v, s)
     return MLXVector{T}(result[])
 end
 
@@ -40,14 +40,14 @@ function Base.sort(a::MLXArray{T, N}; dims::Integer) where {T, N}
     s = get_stream()
     result = Ref(Wrapper.mlx_array_new())
     axis = Cint(dims) - one(Cint)
-    Wrapper.mlx_sort(result, a.mlx_array, axis, s.mlx_stream)
+    Wrapper.mlx_sort(result, a, axis, s)
     return MLXArray{T, N}(result[])
 end
 
 function Base.sortperm(v::MLXVector{T}) where {T}
     s = get_stream()
     result = Ref(Wrapper.mlx_array_new())
-    Wrapper.mlx_argsort_all(result, v.mlx_array, s.mlx_stream)
+    Wrapper.mlx_argsort_all(result, v, s)
     return MLXVector{T}(result[])
 end
 
@@ -55,8 +55,8 @@ function Base.sortperm(a::MLXArray{T, N}; dims::Integer) where {T, N}
     s = get_stream()
     result = Ref(Wrapper.mlx_array_new())
     axis = Cint(dims) - one(Cint)
-    Wrapper.mlx_argsort(result, a.mlx_array, axis, s.mlx_stream)
-    Wrapper.mlx_add(result, result[], Wrapper.mlx_array_new_int(1), s.mlx_stream)
+    Wrapper.mlx_argsort(result, a, axis, s)
+    Wrapper.mlx_add(result, result[], Wrapper.mlx_array_new_int(1), s)
     return MLXArray{T, N}(result[])
 end
 
@@ -66,13 +66,13 @@ function Base.permutedims(
     s = get_stream()
     result = Ref(Wrapper.mlx_array_new())
     if isnothing(dims)
-        Wrapper.mlx_transpose_all(result, a.mlx_array, s.mlx_stream)
+        Wrapper.mlx_transpose_all(result, a, s)
     else
         if dims isa Integer
             dims = Dims(dims)
         end
         axes = collect(Cint.(dims) .- one(Cint))
-        Wrapper.mlx_transpose(result, a.mlx_array, axes, length(axes), s.mlx_stream)
+        Wrapper.mlx_transpose(result, a, axes, length(axes), s)
     end
     return MLXArray{T, N}(result[])
 end
@@ -85,7 +85,7 @@ for (fn, fn_def) in Private.get_unary_scalar_ops()
     ) where {T <: $(fn_def.TIn), N}
         s = get_stream()
         result_ref = Ref(Wrapper.mlx_array_new())
-        $(fn_def.mlx_fn)(result_ref, a.mlx_array, s.mlx_stream)
+        $(fn_def.mlx_fn)(result_ref, a, s)
         @static if $(fn_def.preserves_type)
             return MLXArray{T, N}(result_ref[])
         else
