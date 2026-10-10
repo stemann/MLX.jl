@@ -10,6 +10,8 @@ export MLXArray, MLXException, MLXMatrix, MLXNumber, MLXVecOrMat, MLXVector
 
 include(joinpath(@__DIR__, "Wrapper.jl"))
 
+include(joinpath(@__DIR__, "Private.jl"))
+
 include(joinpath(@__DIR__, "utils.jl"))
 
 include(joinpath(@__DIR__, "array.jl"))
@@ -19,6 +21,8 @@ include(joinpath(@__DIR__, "metal.jl"))
 include(joinpath(@__DIR__, "number.jl"))
 include(joinpath(@__DIR__, "number_types.jl"))
 include(joinpath(@__DIR__, "stream.jl"))
+
+include(joinpath(@__DIR__, "ops.jl"))
 
 function __init__()
     register_error_handler()

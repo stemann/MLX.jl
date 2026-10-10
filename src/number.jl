@@ -63,3 +63,7 @@ function Base.show(io::IO, x::MLXNumber)
     show(io, x.array[])
     return print(io, ")")
 end
+
+# Broadcasting interface, as a 0-dimensional MLXArray
+
+Base.broadcastable(x::MLXNumber) = x.array
