@@ -1,3 +1,5 @@
+module OpsTests
+
 using MLX
 using Random
 using Test
@@ -145,4 +147,6 @@ using Test
             end
         end
     end
+end
+
 end
