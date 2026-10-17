@@ -24,6 +24,7 @@ include(joinpath(@__DIR__, "Internals", "Internals.jl"))
 
 include(joinpath(@__DIR__, "ops_array.jl"))
 include(joinpath(@__DIR__, "ops_unary.jl"))
+include(joinpath(@__DIR__, "ops_binary.jl"))
 
 function __init__()
     register_error_handler()

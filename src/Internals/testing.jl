@@ -25,3 +25,7 @@ end
 
 # MLX 0.23.2 has no complex GPU kernels for some ops, e.g. asin
 real_on_gpu(device_type) = device_type == DeviceTypeGPU ? Real : Number
+
+# Replaces zeros by ones, e.g. in divisors
+without_zeros(x::Number) = iszero(x) ? one(x) : x
+without_zeros(a::AbstractArray) = without_zeros.(a)

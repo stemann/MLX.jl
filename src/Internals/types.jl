@@ -9,3 +9,6 @@ end
 function return_real_type(::Type{TIn}) where {TIn}
     return TIn <: Complex{<:AbstractFloat} ? real(TIn) : TIn
 end
+
+# The element types of MLXArrays
+const ElementType = Union{supported_number_types(DeviceTypeCPU)...}
