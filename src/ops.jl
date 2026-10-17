@@ -65,3 +65,19 @@ function Base.permutedims(a::MLXArray{T, N}, perm) where {T, N}
 end
 
 Base.permutedims(m::MLXMatrix) = permutedims(m, (2, 1))
+
+# Computed in `copy`, as `materialize` does, rather than in `broadcasted`, so that Base's
+# `conj(A)`, `real(A)`, `imag(A)` and `-A`, which broadcast and keep 0-dim arrays, work too
+for (fn, fn_def) in Private.get_unary_ops()
+    @eval function Base.copy(
+        bc::Broadcast.Broadcasted{
+            Broadcast.ArrayStyle{MLXArray}, <:Any, typeof($fn), <:Tuple{MLXArray{T, N}}
+        },
+    ) where {T <: $(fn_def.input_type), N}
+        a = only(bc.args)
+        s = get_stream()
+        result_ref = Ref(Wrapper.mlx_array_new())
+        $(fn_def.mlx_fn)(result_ref, a, s)
+        return MLXArray{$(fn_def.output_type)(T), N}(result_ref[])
+    end
+end
