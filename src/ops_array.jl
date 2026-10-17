@@ -31,7 +31,7 @@ end
 
 function Base.sortperm(v::MLXVector)
     zero_based_indices = Internals.astype(Int, Internals.argsort(v))
-    return Internals.binary_op(Wrapper.mlx_add, zero_based_indices, MLXArray(fill(1)))
+    return zero_based_indices .+ 1
 end
 
 function Base.sortperm(a::MLXArray{T, N}; dims::Integer) where {T, N}
@@ -40,16 +40,10 @@ function Base.sortperm(a::MLXArray{T, N}; dims::Integer) where {T, N}
     n = size(a, dims)
     shape_along_dims = ntuple(d -> d == dims ? n : 1, N)
     positions_along_dims = MLXArray(reshape(collect(0:(n - 1)), shape_along_dims))
-    stride_along_dims = MLXArray(fill(size_to_strides_column(size(a))[dims]))
-    perm_steps_along_dims = Internals.binary_op(
-        Wrapper.mlx_subtract, perm_indices_along_dims, positions_along_dims
-    )
-    perm_linear_offsets = Internals.binary_op(
-        Wrapper.mlx_multiply, perm_steps_along_dims, stride_along_dims
-    )
-    return Internals.binary_op(
-        Wrapper.mlx_add, MLXArray(collect(LinearIndices(a))), perm_linear_offsets
-    )
+    stride_along_dims = size_to_strides_column(size(a))[dims]
+    perm_steps_along_dims = perm_indices_along_dims .- positions_along_dims
+    perm_linear_offsets = perm_steps_along_dims .* stride_along_dims
+    return MLXArray(collect(LinearIndices(a))) .+ perm_linear_offsets
 end
 
 function Base.permutedims(a::MLXArray{T, N}, perm) where {T, N}

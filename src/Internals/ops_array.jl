@@ -17,9 +17,11 @@ function astype(::Type{T}, a::MLXArray{<:Any, N}) where {T, N}
     return MLXArray{T, N}(result[])
 end
 
-function binary_op(mlx_fn, a::MLXArray{T, N}, b::MLXArray{T, M}) where {T, N, M}
+# MLX's reshape, which orders elements row-major, unlike Base's
+function reshape(a::MLXArray{T}, dims::Dims{N}) where {T, N}
     s = get_stream()
     result = Ref(Wrapper.mlx_array_new())
-    mlx_fn(result, a, b, s)
-    return MLXArray{T, max(N, M)}(result[])
+    shape = Cint[dims...]
+    Wrapper.mlx_reshape(result, a, shape, length(shape), s)
+    return MLXArray{T, N}(result[])
 end
