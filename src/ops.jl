@@ -81,3 +81,14 @@ for (fn, fn_def) in Private.get_unary_ops()
         return MLXArray{$(fn_def.output_type)(T), N}(result_ref[])
     end
 end
+
+# A broadcast over an `MLXNumber`'s 0-dim array, which gives an `MLXNumber`
+for (fn, fn_def) in Private.get_unary_ops()
+    if fn in (:isfinite, :isinf, :isnan)
+        # Predicates evaluate, as comparisons do, so they can be used for control flow
+        @eval Base.$fn(x::MLXNumber{T}) where {T <: $(fn_def.input_type)} =
+            Bool($fn.(x.array))
+    else
+        @eval Base.$fn(x::MLXNumber{T}) where {T <: $(fn_def.input_type)} = $fn.(x.array)
+    end
+end
