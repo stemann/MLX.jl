@@ -20,9 +20,10 @@ include(joinpath(@__DIR__, "number.jl"))
 include(joinpath(@__DIR__, "number_types.jl"))
 include(joinpath(@__DIR__, "stream.jl"))
 
-include(joinpath(@__DIR__, "Private.jl"))
+include(joinpath(@__DIR__, "Internals", "Internals.jl"))
 
-include(joinpath(@__DIR__, "ops.jl"))
+include(joinpath(@__DIR__, "ops_array.jl"))
+include(joinpath(@__DIR__, "ops_unary.jl"))
 
 function __init__()
     register_error_handler()

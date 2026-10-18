@@ -83,7 +83,7 @@ using .TestUtils
     # MLX 0.23.2 computes some Float64 functions with about Float32 precision
     rtol = sqrt(eps(Float32))
 
-    for (fn_symbol, fn_def) in MLX.Private.get_unary_ops()
+    for (fn_symbol, fn_def) in MLX.Internals.get_unary_ops()
         fn = eval(fn_symbol)
         function input_types(device_type)
             return filter(
@@ -136,7 +136,7 @@ using .TestUtils
     end
 
     # Base's conj, real, imag and - on arrays broadcast, and keep 0-dim arrays
-    unary_ops = MLX.Private.get_unary_ops()
+    unary_ops = MLX.Internals.get_unary_ops()
     testset_foreach("0-dim array functions"; array_sizes = [()]) do T, array_size
         for fn in (conj, real, imag, -)
             T <: unary_ops[Symbol(fn)].input_type || continue

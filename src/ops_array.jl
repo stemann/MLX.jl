@@ -30,24 +30,24 @@ function Base.sort(a::MLXArray{T, N}; dims::Integer) where {T, N}
 end
 
 function Base.sortperm(v::MLXVector)
-    zero_based_indices = Private.astype(Int, Private.argsort(v))
-    return Private.binary_op(Wrapper.mlx_add, zero_based_indices, MLXArray(fill(1)))
+    zero_based_indices = Internals.astype(Int, Internals.argsort(v))
+    return Internals.binary_op(Wrapper.mlx_add, zero_based_indices, MLXArray(fill(1)))
 end
 
 function Base.sortperm(a::MLXArray{T, N}; dims::Integer) where {T, N}
     # Linear indices, as for Array, from the indices along dims returned by argsort
-    perm_indices_along_dims = Private.astype(Int, Private.argsort(a; dims))
+    perm_indices_along_dims = Internals.astype(Int, Internals.argsort(a; dims))
     n = size(a, dims)
     shape_along_dims = ntuple(d -> d == dims ? n : 1, N)
     positions_along_dims = MLXArray(reshape(collect(0:(n - 1)), shape_along_dims))
     stride_along_dims = MLXArray(fill(size_to_strides_column(size(a))[dims]))
-    perm_steps_along_dims = Private.binary_op(
+    perm_steps_along_dims = Internals.binary_op(
         Wrapper.mlx_subtract, perm_indices_along_dims, positions_along_dims
     )
-    perm_linear_offsets = Private.binary_op(
+    perm_linear_offsets = Internals.binary_op(
         Wrapper.mlx_multiply, perm_steps_along_dims, stride_along_dims
     )
-    return Private.binary_op(
+    return Internals.binary_op(
         Wrapper.mlx_add, MLXArray(collect(LinearIndices(a))), perm_linear_offsets
     )
 end
@@ -65,30 +65,3 @@ function Base.permutedims(a::MLXArray{T, N}, perm) where {T, N}
 end
 
 Base.permutedims(m::MLXMatrix) = permutedims(m, (2, 1))
-
-# Computed in `copy`, as `materialize` does, rather than in `broadcasted`, so that Base's
-# `conj(A)`, `real(A)`, `imag(A)` and `-A`, which broadcast and keep 0-dim arrays, work too
-for (fn, fn_def) in Private.get_unary_ops()
-    @eval function Base.copy(
-        bc::Broadcast.Broadcasted{
-            Broadcast.ArrayStyle{MLXArray}, <:Any, typeof($fn), <:Tuple{MLXArray{T, N}}
-        },
-    ) where {T <: $(fn_def.input_type), N}
-        a = only(bc.args)
-        s = get_stream()
-        result_ref = Ref(Wrapper.mlx_array_new())
-        $(fn_def.mlx_fn)(result_ref, a, s)
-        return MLXArray{$(fn_def.output_type)(T), N}(result_ref[])
-    end
-end
-
-# A broadcast over an `MLXNumber`'s 0-dim array, which gives an `MLXNumber`
-for (fn, fn_def) in Private.get_unary_ops()
-    if fn in (:isfinite, :isinf, :isnan)
-        # Predicates evaluate, as comparisons do, so they can be used for control flow
-        @eval Base.$fn(x::MLXNumber{T}) where {T <: $(fn_def.input_type)} =
-            Bool($fn.(x.array))
-    else
-        @eval Base.$fn(x::MLXNumber{T}) where {T <: $(fn_def.input_type)} = $fn.(x.array)
-    end
-end
