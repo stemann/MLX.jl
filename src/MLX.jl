@@ -19,6 +19,7 @@ include(joinpath(@__DIR__, "metal.jl"))
 include(joinpath(@__DIR__, "number.jl"))
 include(joinpath(@__DIR__, "number_types.jl"))
 include(joinpath(@__DIR__, "stream.jl"))
+include(joinpath(@__DIR__, "transforms.jl"))
 
 include(joinpath(@__DIR__, "Internals", "Internals.jl"))
 

@@ -8,4 +8,5 @@ using Test
     include(joinpath(@__DIR__, "NumberTypesTests.jl"))
     include(joinpath(@__DIR__, "OpsTests.jl"))
     include(joinpath(@__DIR__, "StreamTests.jl"))
+    include(joinpath(@__DIR__, "TransformsTests.jl"))
 end
