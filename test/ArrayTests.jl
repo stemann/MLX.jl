@@ -21,7 +21,7 @@ using .TestUtils
         testset_foreach("Required methods") do T, array_size
             array = rand(T, array_size)
             mlx_array = to_mlx(array)
-            @test size(mlx_array) == size(array)
+            @test @inferred(size(mlx_array)) == size(array)
             if ndims(array) > 0
                 @test getindex(mlx_array, 1) == array[1]
             end
@@ -38,6 +38,7 @@ using .TestUtils
                 if ndims(array) > 0
                     array[1] = iszero(array[1]) ? one(T) : zero(T) # Differs from array[1]
                     @test setindex!(mlx_array, array[1], 1) == array
+                    @test setindex!(mlx_array, true, 1)[1] == one(T) # Converts, as for Array
                 end
             end
             testset_foreach("UndefInitializer") do T, array_size
@@ -91,13 +92,12 @@ using .TestUtils
         mlx_array = MLXArray(array)
 
         if ndims(array) > 0
-            @test strides(mlx_array) ==
+            @test @inferred(strides(mlx_array)) ==
                 reverse(strides(permutedims(array, reverse(1:ndims(array)))))
         else
-            @test strides(mlx_array) == strides(array)
+            @test @inferred(strides(mlx_array)) == strides(array)
         end
         @test Base.unsafe_convert(Ptr{T}, mlx_array) isa Ptr{T}
-        @test unsafe_wrap(mlx_array) == array
         @test Base.elsize(mlx_array) == Base.elsize(array)
         @test Base.elsize(typeof(mlx_array)) == Base.elsize(typeof(array))
 

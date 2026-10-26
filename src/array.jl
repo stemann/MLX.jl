@@ -60,22 +60,29 @@ MLXArray(array::BitArray{N}) where {N} = MLXArray{Bool, N}(array)
 
 # AbstractArray interface, cf. https://docs.julialang.org/en/v1/manual/interfaces/#man-interface-array
 
-function Base.size(array::MLXArray)
-    return GC.@preserve array Tuple(
-        Int.(
-            unsafe_wrap(
-                Vector{Cint}, Wrapper.mlx_array_shape(array), Wrapper.mlx_array_ndim(array)
-            ),
-        ),
-    )
+function Base.size(array::MLXArray{T, N}) where {T, N}
+    return GC.@preserve array begin
+        shape = Wrapper.mlx_array_shape(array)
+        ntuple(d -> Int(unsafe_load(shape, d)), Val(N))
+    end
 end
 
 Base.IndexStyle(::Type{<:MLXArray}) = IndexLinear()
 
-Base.getindex(array::MLXArray, i::Int) = GC.@preserve array getindex(unsafe_wrap(array), i)
+function Base.getindex(array::MLXArray{T, N}, i::Int) where {T, N}
+    @boundscheck checkbounds(array, i)
+    return GC.@preserve array begin
+        data = Base.unsafe_convert(Ptr{T}, array)
+        unsafe_load(data, Internals.data_offset(array, i) + 1)
+    end
+end
 
-function Base.setindex!(array::MLXArray{T, N}, v::T, i::Int) where {T, N}
-    GC.@preserve array setindex!(unsafe_wrap(array), v, i)
+function Base.setindex!(array::MLXArray{T, N}, v, i::Int) where {T, N}
+    @boundscheck checkbounds(array, i)
+    GC.@preserve array begin
+        data = Base.unsafe_convert(Ptr{T}, array)
+        unsafe_store!(data, convert(T, v), Internals.data_offset(array, i) + 1)
+    end
     return array
 end
 
@@ -85,16 +92,11 @@ end
 
 # Strided array interface, cf. https://docs.julialang.org/en/v1/manual/interfaces/#man-interface-strided-arrays
 
-function Base.strides(array::MLXArray)
-    array_strides = GC.@preserve array Tuple(
-        Int.(
-            unsafe_wrap(
-                Vector{Csize_t},
-                Wrapper.mlx_array_strides(array),
-                Wrapper.mlx_array_ndim(array),
-            ),
-        ),
-    )
+function Base.strides(array::MLXArray{T, N}) where {T, N}
+    array_strides = GC.@preserve array begin
+        mlx_strides = Wrapper.mlx_array_strides(array)
+        ntuple(d -> Int(unsafe_load(mlx_strides, d)), Val(N))
+    end
     if any(iszero, array_strides) # Workaround for MLX issue where strides may be zero for dims of size 1: https://github.com/ml-explore/mlx/issues/2501
         non_zero_strides = map(s -> iszero(s) ? 1 : s, array_strides)
         @debug "Some strides are zero in $array_strides - returning strides $non_zero_strides for array of size $(size(array))"
@@ -144,19 +146,6 @@ Base.elsize(::Type{MLXArray{T, N}}) where {T, N} = sizeof(T)
 
 function Base.elsize(array::MLXArray{T, N}) where {T, N}
     return Int(Wrapper.mlx_array_itemsize(array))
-end
-
-function Base.unsafe_wrap(array::MLXArray{T, N}) where {T, N}
-    is_column_major = storage_order(array) == ArrayStorageOrderColumn
-    size_column_major = is_column_major ? size(array) : reverse(size(array))
-    wrapped_array = unsafe_wrap(
-        Array, Base.unsafe_convert(Ptr{T}, array), size_column_major
-    )
-    if is_column_major
-        return PermutedDimsArray(wrapped_array, 1:ndims(array))
-    else
-        return PermutedDimsArray(wrapped_array, reverse(1:ndims(array)))
-    end
 end
 
 # Broadcasting interface, cf. https://docs.julialang.org/en/v1/manual/interfaces/#man-interfaces-broadcasting
