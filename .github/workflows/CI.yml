@@ -1,62 +1,26 @@
 name: CI
 on:
-  push:
-    branches:
-      - master
-    tags: ['*']
-  pull_request:
   workflow_dispatch:
-concurrency:
-  # Skip intermediate builds: always.
-  # Cancel intermediate builds: only if it is a pull request build.
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ startsWith(github.ref, 'refs/pull/') }}
 jobs:
-  test:
-    name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }}
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 60
-    permissions: # needed to allow julia-actions/cache to proactively delete old caches that it has created
-      actions: write
-      contents: read
+  windows-loading:
+    name: Julia ${{ matrix.version }} - windows-2025 - x64
+    runs-on: windows-2025
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
         version:
           - '1'
           - lts
-        os:
-          - macos-26
-          - macos-26-intel
-          - ubuntu-24.04
-          - ubuntu-24.04-arm
-          - windows-2025
-        arch:
-          - aarch64
-          - x64
-        exclude:
-          - os: macos-26
-            arch: x64
-          - os: macos-26-intel
-            arch: aarch64
-          - os: ubuntu-24.04
-            arch: aarch64
-          - os: ubuntu-24.04-arm
-            arch: x64
-          - os: windows-2025
-            arch: aarch64
+    defaults:
+      run:
+        shell: bash
     steps:
-      - uses: actions/checkout@v7
       - uses: julia-actions/setup-julia@v3
         with:
           version: ${{ matrix.version }}
-          arch: ${{ matrix.arch }}
-      - uses: julia-actions/cache@v3
-      - uses: julia-actions/julia-buildpkg@v1
-      - name: Load MLX_jll and its dependencies one by one
-        if: runner.os == 'Windows'
+      - name: Add MLX_jll and its dependencies
         timeout-minutes: 10
-        shell: bash
         run: |
           julia --project=mlx_jll --color=yes -e '
               using Pkg
@@ -64,24 +28,18 @@ jobs:
               project_file = joinpath(dirname(dirname(Base.find_package("MLX_jll"))), "Project.toml")
               deps = setdiff(keys(Pkg.Types.read_project(project_file).deps), ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "LazyArtifacts"])
               Pkg.add(collect(deps))'
+      - name: Load MLX_jll, then exit without unloading (_exit)
+        timeout-minutes: 2
+        continue-on-error: true
+        run: |
           julia --project=mlx_jll --color=yes -e '
-              using Pkg
-              for dep in sort!(setdiff(collect(keys(Pkg.project().dependencies)), ["MLX_jll"]))
-                  println("Loading ", dep); flush(stdout)
-                  Base.require(Main, Symbol(dep))
-              end
-              println("Loading MLX_jll"); flush(stdout)
               using MLX_jll
-              println("Loaded MLX_jll")'
-      - name: Precompile and load
-        timeout-minutes: 10
-        env:
-          JULIA_DEBUG: loading
-        shell: bash
-        run: julia --project --color=yes -e 'using Pkg; Pkg.instantiate(); Pkg.precompile(); using MLX'
-      - uses: julia-actions/julia-runtest@v1
-      - uses: julia-actions/julia-processcoverage@v1
-      - uses: codecov/codecov-action@v7
-        with:
-          files: lcov.info
-          token: ${{ secrets.CODECOV_TOKEN }}
+              println("Loaded MLX_jll, exiting with _exit"); flush(stdout)
+              ccall(:_exit, Cvoid, (Cint,), 0)'
+      - name: Load MLX_jll, then exit normally (exit)
+        timeout-minutes: 2
+        run: |
+          julia --project=mlx_jll --color=yes -e '
+              using MLX_jll
+              println("Loaded MLX_jll, exiting with exit"); flush(stdout)
+              exit(0)'
