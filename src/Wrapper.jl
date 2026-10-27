@@ -3,15 +3,13 @@ module Wrapper
 using MLX_C_jll
 export MLX_C_jll
 
-using CEnum
-
 struct mlx_array_
     ctx::Ptr{Cvoid}
 end
 
 const mlx_array = mlx_array_
 
-@cenum mlx_dtype_::UInt32 begin
+@enum mlx_dtype_::UInt32 begin
     MLX_BOOL = 0
     MLX_UINT8 = 1
     MLX_UINT16 = 2
@@ -279,7 +277,7 @@ end
 
 const mlx_closure = mlx_closure_
 
-# no prototype is found for this function at closure.h:27:13, please use with caution
+# no prototype is found for this function at closure.h:28:13, please use with caution
 function mlx_closure_new()
     ccall((:mlx_closure_new, libmlxc), mlx_closure, ())
 end
@@ -314,13 +312,50 @@ function mlx_closure_new_unary(fun)
     ccall((:mlx_closure_new_unary, libmlxc), mlx_closure, (Ptr{Cvoid},), fun)
 end
 
+struct mlx_closure_kwargs_
+    ctx::Ptr{Cvoid}
+end
+
+const mlx_closure_kwargs = mlx_closure_kwargs_
+
+# no prototype is found for this function at closure.h:47:20, please use with caution
+function mlx_closure_kwargs_new()
+    ccall((:mlx_closure_kwargs_new, libmlxc), mlx_closure_kwargs, ())
+end
+
+function mlx_closure_kwargs_free(cls)
+    ccall((:mlx_closure_kwargs_free, libmlxc), Cint, (mlx_closure_kwargs,), cls)
+end
+
+function mlx_closure_kwargs_new_func(fun)
+    ccall((:mlx_closure_kwargs_new_func, libmlxc), mlx_closure_kwargs, (Ptr{Cvoid},), fun)
+end
+
+function mlx_closure_kwargs_new_func_payload(fun, payload, dtor)
+    ccall((:mlx_closure_kwargs_new_func_payload, libmlxc), mlx_closure_kwargs, (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}), fun, payload, dtor)
+end
+
+function mlx_closure_kwargs_set(cls, src)
+    ccall((:mlx_closure_kwargs_set, libmlxc), Cint, (Ptr{mlx_closure_kwargs}, mlx_closure_kwargs), cls, src)
+end
+
+struct mlx_map_string_to_array_
+    ctx::Ptr{Cvoid}
+end
+
+const mlx_map_string_to_array = mlx_map_string_to_array_
+
+function mlx_closure_kwargs_apply(res, cls, input_0, input_1)
+    ccall((:mlx_closure_kwargs_apply, libmlxc), Cint, (Ptr{mlx_vector_array}, mlx_closure_kwargs, mlx_vector_array, mlx_map_string_to_array), res, cls, input_0, input_1)
+end
+
 struct mlx_closure_value_and_grad_
     ctx::Ptr{Cvoid}
 end
 
 const mlx_closure_value_and_grad = mlx_closure_value_and_grad_
 
-# no prototype is found for this function at closure.h:46:28, please use with caution
+# no prototype is found for this function at closure.h:73:28, please use with caution
 function mlx_closure_value_and_grad_new()
     ccall((:mlx_closure_value_and_grad_new, libmlxc), mlx_closure_value_and_grad, ())
 end
@@ -351,7 +386,7 @@ end
 
 const mlx_closure_custom = mlx_closure_custom_
 
-# no prototype is found for this function at closure.h:70:20, please use with caution
+# no prototype is found for this function at closure.h:97:20, please use with caution
 function mlx_closure_custom_new()
     ccall((:mlx_closure_custom_new, libmlxc), mlx_closure_custom, ())
 end
@@ -382,7 +417,7 @@ end
 
 const mlx_closure_custom_jvp = mlx_closure_custom_jvp_
 
-# no prototype is found for this function at closure.h:99:24, please use with caution
+# no prototype is found for this function at closure.h:126:24, please use with caution
 function mlx_closure_custom_jvp_new()
     ccall((:mlx_closure_custom_jvp_new, libmlxc), mlx_closure_custom_jvp, ())
 end
@@ -413,7 +448,7 @@ end
 
 const mlx_closure_custom_vmap = mlx_closure_custom_vmap_
 
-# no prototype is found for this function at closure.h:131:25, please use with caution
+# no prototype is found for this function at closure.h:158:25, please use with caution
 function mlx_closure_custom_vmap_new()
     ccall((:mlx_closure_custom_vmap_new, libmlxc), mlx_closure_custom_vmap, ())
 end
@@ -444,7 +479,7 @@ function mlx_closure_custom_vmap_apply(res_0, res_1, cls, input_0, input_1, inpu
     ccall((:mlx_closure_custom_vmap_apply, libmlxc), Cint, (Ptr{mlx_vector_array}, Ptr{mlx_vector_int}, mlx_closure_custom_vmap, mlx_vector_array, Ptr{Cint}, Csize_t), res_0, res_1, cls, input_0, input_1, input_1_num)
 end
 
-@cenum mlx_compile_mode_::UInt32 begin
+@enum mlx_compile_mode_::UInt32 begin
     MLX_COMPILE_MODE_DISABLED = 0
     MLX_COMPILE_MODE_NO_SIMPLIFY = 1
     MLX_COMPILE_MODE_NO_FUSE = 2
@@ -461,7 +496,7 @@ function mlx_detail_compile(res, fun, fun_id, shapeless, constants, constants_nu
     ccall((:mlx_detail_compile, libmlxc), Cint, (Ptr{mlx_closure}, mlx_closure, Csize_t, Bool, Ptr{UInt64}, Csize_t), res, fun, fun_id, shapeless, constants, constants_num)
 end
 
-# no prototype is found for this function at compile.h:42:5, please use with caution
+# no prototype is found for this function at compile.h:44:5, please use with caution
 function mlx_detail_compile_clear_cache()
     ccall((:mlx_detail_compile_clear_cache, libmlxc), Cint, ())
 end
@@ -470,12 +505,12 @@ function mlx_detail_compile_erase(fun_id)
     ccall((:mlx_detail_compile_erase, libmlxc), Cint, (Csize_t,), fun_id)
 end
 
-# no prototype is found for this function at compile.h:44:5, please use with caution
+# no prototype is found for this function at compile.h:46:5, please use with caution
 function mlx_disable_compile()
     ccall((:mlx_disable_compile, libmlxc), Cint, ())
 end
 
-# no prototype is found for this function at compile.h:45:5, please use with caution
+# no prototype is found for this function at compile.h:47:5, please use with caution
 function mlx_enable_compile()
     ccall((:mlx_enable_compile, libmlxc), Cint, ())
 end
@@ -490,14 +525,14 @@ end
 
 const mlx_device = mlx_device_
 
-@cenum mlx_device_type_::UInt32 begin
+@enum mlx_device_type_::UInt32 begin
     MLX_CPU = 0
     MLX_GPU = 1
 end
 
 const mlx_device_type = mlx_device_type_
 
-# no prototype is found for this function at device.h:33:12, please use with caution
+# no prototype is found for this function at device.h:35:12, please use with caution
 function mlx_device_new()
     ccall((:mlx_device_new, libmlxc), mlx_device, ())
 end
@@ -519,7 +554,7 @@ function mlx_device_tostring(str, dev)
 end
 
 function mlx_device_equal(lhs, rhs)
-    ccall((:mlx_device_equal, libmlxc), Cint, (mlx_device, mlx_device), lhs, rhs)
+    ccall((:mlx_device_equal, libmlxc), Bool, (mlx_device, mlx_device), lhs, rhs)
 end
 
 function mlx_device_get_index(index, dev)
@@ -554,6 +589,14 @@ function mlx_distributed_all_gather(res, x, group, S)
     ccall((:mlx_distributed_all_gather, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_distributed_group, mlx_stream), res, x, group, S)
 end
 
+function mlx_distributed_all_max(res, x, group, s)
+    ccall((:mlx_distributed_all_max, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_distributed_group, mlx_stream), res, x, group, s)
+end
+
+function mlx_distributed_all_min(res, x, group, s)
+    ccall((:mlx_distributed_all_min, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_distributed_group, mlx_stream), res, x, group, s)
+end
+
 function mlx_distributed_all_sum(res, x, group, s)
     ccall((:mlx_distributed_all_sum, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_distributed_group, mlx_stream), res, x, group, s)
 end
@@ -582,7 +625,7 @@ function mlx_distributed_group_split(group, color, key)
     ccall((:mlx_distributed_group_split, libmlxc), mlx_distributed_group, (mlx_distributed_group, Cint, Cint), group, color, key)
 end
 
-# no prototype is found for this function at distributed_group.h:43:6, please use with caution
+# no prototype is found for this function at distributed_group.h:45:6, please use with caution
 function mlx_distributed_is_available()
     ccall((:mlx_distributed_is_available, libmlxc), Bool, ())
 end
@@ -598,6 +641,58 @@ function mlx_set_error_handler(handler, data, dtor)
     ccall((:mlx_set_error_handler, libmlxc), Cvoid, (mlx_error_handler_func, Ptr{Cvoid}, Ptr{Cvoid}), handler, data, dtor)
 end
 
+function mlx_export_function(file, fun, args, shapeless)
+    ccall((:mlx_export_function, libmlxc), Cint, (Ptr{Cchar}, mlx_closure, mlx_vector_array, Bool), file, fun, args, shapeless)
+end
+
+function mlx_export_function_kwargs(file, fun, args, kwargs, shapeless)
+    ccall((:mlx_export_function_kwargs, libmlxc), Cint, (Ptr{Cchar}, mlx_closure_kwargs, mlx_vector_array, mlx_map_string_to_array, Bool), file, fun, args, kwargs, shapeless)
+end
+
+struct mlx_function_exporter_
+    ctx::Ptr{Cvoid}
+end
+
+const mlx_function_exporter = mlx_function_exporter_
+
+function mlx_function_exporter_new(file, fun, shapeless)
+    ccall((:mlx_function_exporter_new, libmlxc), mlx_function_exporter, (Ptr{Cchar}, mlx_closure, Bool), file, fun, shapeless)
+end
+
+function mlx_function_exporter_free(xfunc)
+    ccall((:mlx_function_exporter_free, libmlxc), Cint, (mlx_function_exporter,), xfunc)
+end
+
+function mlx_function_exporter_apply(xfunc, args)
+    ccall((:mlx_function_exporter_apply, libmlxc), Cint, (mlx_function_exporter, mlx_vector_array), xfunc, args)
+end
+
+function mlx_function_exporter_apply_kwargs(xfunc, args, kwargs)
+    ccall((:mlx_function_exporter_apply_kwargs, libmlxc), Cint, (mlx_function_exporter, mlx_vector_array, mlx_map_string_to_array), xfunc, args, kwargs)
+end
+
+struct mlx_imported_function_
+    ctx::Ptr{Cvoid}
+end
+
+const mlx_imported_function = mlx_imported_function_
+
+function mlx_imported_function_new(file)
+    ccall((:mlx_imported_function_new, libmlxc), mlx_imported_function, (Ptr{Cchar},), file)
+end
+
+function mlx_imported_function_free(xfunc)
+    ccall((:mlx_imported_function_free, libmlxc), Cint, (mlx_imported_function,), xfunc)
+end
+
+function mlx_imported_function_apply(res, xfunc, args)
+    ccall((:mlx_imported_function_apply, libmlxc), Cint, (Ptr{mlx_vector_array}, mlx_imported_function, mlx_vector_array), res, xfunc, args)
+end
+
+function mlx_imported_function_apply_kwargs(res, xfunc, args, kwargs)
+    ccall((:mlx_imported_function_apply_kwargs, libmlxc), Cint, (Ptr{mlx_vector_array}, mlx_imported_function, mlx_vector_array, mlx_map_string_to_array), res, xfunc, args, kwargs)
+end
+
 function mlx_fast_affine_dequantize(res, w, scales, biases, group_size, bits, s)
     ccall((:mlx_fast_affine_dequantize, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_array, mlx_array, Cint, Cint, mlx_stream), res, w, scales, biases, group_size, bits, s)
 end
@@ -610,70 +705,75 @@ function mlx_fast_layer_norm(res, x, weight, bias, eps, s)
     ccall((:mlx_fast_layer_norm, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_array, mlx_array, Cfloat, mlx_stream), res, x, weight, bias, eps, s)
 end
 
+struct mlx_fast_metal_kernel_config_
+    ctx::Ptr{Cvoid}
+end
+
+const mlx_fast_metal_kernel_config = mlx_fast_metal_kernel_config_
+
+# no prototype is found for this function at fast.h:57:30, please use with caution
+function mlx_fast_metal_kernel_config_new()
+    ccall((:mlx_fast_metal_kernel_config_new, libmlxc), mlx_fast_metal_kernel_config, ())
+end
+
+function mlx_fast_metal_kernel_config_free(cls)
+    ccall((:mlx_fast_metal_kernel_config_free, libmlxc), Cvoid, (mlx_fast_metal_kernel_config,), cls)
+end
+
+function mlx_fast_metal_kernel_config_add_output_arg(cls, shape, size, dtype)
+    ccall((:mlx_fast_metal_kernel_config_add_output_arg, libmlxc), Cint, (mlx_fast_metal_kernel_config, Ptr{Cint}, Csize_t, mlx_dtype), cls, shape, size, dtype)
+end
+
+function mlx_fast_metal_kernel_config_set_grid(cls, grid1, grid2, grid3)
+    ccall((:mlx_fast_metal_kernel_config_set_grid, libmlxc), Cint, (mlx_fast_metal_kernel_config, Cint, Cint, Cint), cls, grid1, grid2, grid3)
+end
+
+function mlx_fast_metal_kernel_config_set_thread_group(cls, thread1, thread2, thread3)
+    ccall((:mlx_fast_metal_kernel_config_set_thread_group, libmlxc), Cint, (mlx_fast_metal_kernel_config, Cint, Cint, Cint), cls, thread1, thread2, thread3)
+end
+
+function mlx_fast_metal_kernel_config_set_init_value(cls, value)
+    ccall((:mlx_fast_metal_kernel_config_set_init_value, libmlxc), Cint, (mlx_fast_metal_kernel_config, Cfloat), cls, value)
+end
+
+function mlx_fast_metal_kernel_config_set_verbose(cls, verbose)
+    ccall((:mlx_fast_metal_kernel_config_set_verbose, libmlxc), Cint, (mlx_fast_metal_kernel_config, Bool), cls, verbose)
+end
+
+function mlx_fast_metal_kernel_config_add_template_arg_dtype(cls, name, dtype)
+    ccall((:mlx_fast_metal_kernel_config_add_template_arg_dtype, libmlxc), Cint, (mlx_fast_metal_kernel_config, Ptr{Cchar}, mlx_dtype), cls, name, dtype)
+end
+
+function mlx_fast_metal_kernel_config_add_template_arg_int(cls, name, value)
+    ccall((:mlx_fast_metal_kernel_config_add_template_arg_int, libmlxc), Cint, (mlx_fast_metal_kernel_config, Ptr{Cchar}, Cint), cls, name, value)
+end
+
+function mlx_fast_metal_kernel_config_add_template_arg_bool(cls, name, value)
+    ccall((:mlx_fast_metal_kernel_config_add_template_arg_bool, libmlxc), Cint, (mlx_fast_metal_kernel_config, Ptr{Cchar}, Bool), cls, name, value)
+end
+
 struct mlx_fast_metal_kernel_
     ctx::Ptr{Cvoid}
 end
 
 const mlx_fast_metal_kernel = mlx_fast_metal_kernel_
 
-function mlx_fast_metal_kernel_new(name, source, header)
-    ccall((:mlx_fast_metal_kernel_new, libmlxc), mlx_fast_metal_kernel, (Ptr{Cchar}, Ptr{Cchar}, Ptr{Cchar}), name, source, header)
+struct mlx_vector_string_
+    ctx::Ptr{Cvoid}
+end
+
+const mlx_vector_string = mlx_vector_string_
+
+function mlx_fast_metal_kernel_new(name, input_names, output_names, source, header, ensure_row_contiguous, atomic_outputs)
+    ccall((:mlx_fast_metal_kernel_new, libmlxc), mlx_fast_metal_kernel, (Ptr{Cchar}, mlx_vector_string, mlx_vector_string, Ptr{Cchar}, Ptr{Cchar}, Bool, Bool), name, input_names, output_names, source, header, ensure_row_contiguous, atomic_outputs)
 end
 
 function mlx_fast_metal_kernel_free(cls)
     ccall((:mlx_fast_metal_kernel_free, libmlxc), Cvoid, (mlx_fast_metal_kernel,), cls)
 end
 
-function mlx_fast_metal_kernel_add_input_name(cls, name)
-    ccall((:mlx_fast_metal_kernel_add_input_name, libmlxc), Cint, (mlx_fast_metal_kernel, Ptr{Cchar}), cls, name)
-end
-
-function mlx_fast_metal_kernel_add_output_name(cls, name)
-    ccall((:mlx_fast_metal_kernel_add_output_name, libmlxc), Cint, (mlx_fast_metal_kernel, Ptr{Cchar}), cls, name)
-end
-
-function mlx_fast_metal_kernel_set_contiguous_rows(cls, flag)
-    ccall((:mlx_fast_metal_kernel_set_contiguous_rows, libmlxc), Cint, (mlx_fast_metal_kernel, Bool), cls, flag)
-end
-
-function mlx_fast_metal_kernel_set_atomic_outputs(cls, flag)
-    ccall((:mlx_fast_metal_kernel_set_atomic_outputs, libmlxc), Cint, (mlx_fast_metal_kernel, Bool), cls, flag)
-end
-
-function mlx_fast_metal_kernel_add_output_arg(cls, shape, size, dtype)
-    ccall((:mlx_fast_metal_kernel_add_output_arg, libmlxc), Cint, (mlx_fast_metal_kernel, Ptr{Cint}, Csize_t, mlx_dtype), cls, shape, size, dtype)
-end
-
-function mlx_fast_metal_kernel_set_grid(cls, grid1, grid2, grid3)
-    ccall((:mlx_fast_metal_kernel_set_grid, libmlxc), Cint, (mlx_fast_metal_kernel, Cint, Cint, Cint), cls, grid1, grid2, grid3)
-end
-
-function mlx_fast_metal_kernel_set_thread_group(cls, thread1, thread2, thread3)
-    ccall((:mlx_fast_metal_kernel_set_thread_group, libmlxc), Cint, (mlx_fast_metal_kernel, Cint, Cint, Cint), cls, thread1, thread2, thread3)
-end
-
-function mlx_fast_metal_kernel_set_init_value(cls, value)
-    ccall((:mlx_fast_metal_kernel_set_init_value, libmlxc), Cint, (mlx_fast_metal_kernel, Cfloat), cls, value)
-end
-
-function mlx_fast_metal_kernel_set_verbose(cls, verbose)
-    ccall((:mlx_fast_metal_kernel_set_verbose, libmlxc), Cint, (mlx_fast_metal_kernel, Bool), cls, verbose)
-end
-
-function mlx_fast_metal_kernel_add_template_arg_dtype(cls, name, dtype)
-    ccall((:mlx_fast_metal_kernel_add_template_arg_dtype, libmlxc), Cint, (mlx_fast_metal_kernel, Ptr{Cchar}, mlx_dtype), cls, name, dtype)
-end
-
-function mlx_fast_metal_kernel_add_template_arg_int(cls, name, value)
-    ccall((:mlx_fast_metal_kernel_add_template_arg_int, libmlxc), Cint, (mlx_fast_metal_kernel, Ptr{Cchar}, Cint), cls, name, value)
-end
-
-function mlx_fast_metal_kernel_add_template_arg_bool(cls, name, value)
-    ccall((:mlx_fast_metal_kernel_add_template_arg_bool, libmlxc), Cint, (mlx_fast_metal_kernel, Ptr{Cchar}, Bool), cls, name, value)
-end
-
-function mlx_fast_metal_kernel_apply(outputs, cls, inputs, stream)
-    ccall((:mlx_fast_metal_kernel_apply, libmlxc), Cint, (Ptr{mlx_vector_array}, mlx_fast_metal_kernel, mlx_vector_array, mlx_stream), outputs, cls, inputs, stream)
+function mlx_fast_metal_kernel_apply(outputs, cls, inputs, config, stream)
+    ccall((:mlx_fast_metal_kernel_apply, libmlxc), Cint, (Ptr{mlx_vector_array}, mlx_fast_metal_kernel, mlx_vector_array, mlx_fast_metal_kernel_config, mlx_stream), outputs, cls, inputs, config, stream)
 end
 
 function mlx_fast_rms_norm(res, x, weight, eps, s)
@@ -691,15 +791,8 @@ function mlx_fast_rope(res, x, dims, traditional, base, scale, offset, freqs, s)
     ccall((:mlx_fast_rope, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cint, Bool, mlx_optional_float, Cfloat, Cint, mlx_array, mlx_stream), res, x, dims, traditional, base, scale, offset, freqs, s)
 end
 
-struct mlx_optional_int_
-    value::Cint
-    has_value::Bool
-end
-
-const mlx_optional_int = mlx_optional_int_
-
-function mlx_fast_scaled_dot_product_attention(res, queries, keys, values, scale, mask, memory_efficient_threshold, s)
-    ccall((:mlx_fast_scaled_dot_product_attention, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_array, mlx_array, Cfloat, mlx_array, mlx_optional_int, mlx_stream), res, queries, keys, values, scale, mask, memory_efficient_threshold, s)
+function mlx_fast_scaled_dot_product_attention(res, queries, keys, values, scale, mask_mode, mask_arrs, s)
+    ccall((:mlx_fast_scaled_dot_product_attention, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_array, mlx_array, Cfloat, Ptr{Cchar}, mlx_vector_array, mlx_stream), res, queries, keys, values, scale, mask_mode, mask_arrs, s)
 end
 
 function mlx_fft_fft(res, a, n, axis, s)
@@ -750,19 +843,19 @@ function mlx_fft_rfftn(res, a, n, n_num, axes, axes_num, s)
     ccall((:mlx_fft_rfftn, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Ptr{Cint}, Csize_t, Ptr{Cint}, Csize_t, mlx_stream), res, a, n, n_num, axes, axes_num, s)
 end
 
-function mlx_load_file(res, in_stream, s)
-    ccall((:mlx_load_file, libmlxc), Cint, (Ptr{mlx_array}, Ptr{Libc.FILE}, mlx_stream), res, in_stream, s)
+struct mlx_io_reader_
+    ctx::Ptr{Cvoid}
+end
+
+const mlx_io_reader = mlx_io_reader_
+
+function mlx_load_reader(res, in_stream, s)
+    ccall((:mlx_load_reader, libmlxc), Cint, (Ptr{mlx_array}, mlx_io_reader, mlx_stream), res, in_stream, s)
 end
 
 function mlx_load(res, file, s)
     ccall((:mlx_load, libmlxc), Cint, (Ptr{mlx_array}, Ptr{Cchar}, mlx_stream), res, file, s)
 end
-
-struct mlx_map_string_to_array_
-    ctx::Ptr{Cvoid}
-end
-
-const mlx_map_string_to_array = mlx_map_string_to_array_
 
 struct mlx_map_string_to_string_
     ctx::Ptr{Cvoid}
@@ -770,28 +863,80 @@ end
 
 const mlx_map_string_to_string = mlx_map_string_to_string_
 
-function mlx_load_safetensors_file(res_0, res_1, in_stream, s)
-    ccall((:mlx_load_safetensors_file, libmlxc), Cint, (Ptr{mlx_map_string_to_array}, Ptr{mlx_map_string_to_string}, Ptr{Libc.FILE}, mlx_stream), res_0, res_1, in_stream, s)
+function mlx_load_safetensors_reader(res_0, res_1, in_stream, s)
+    ccall((:mlx_load_safetensors_reader, libmlxc), Cint, (Ptr{mlx_map_string_to_array}, Ptr{mlx_map_string_to_string}, mlx_io_reader, mlx_stream), res_0, res_1, in_stream, s)
 end
 
 function mlx_load_safetensors(res_0, res_1, file, s)
     ccall((:mlx_load_safetensors, libmlxc), Cint, (Ptr{mlx_map_string_to_array}, Ptr{mlx_map_string_to_string}, Ptr{Cchar}, mlx_stream), res_0, res_1, file, s)
 end
 
-function mlx_save_file(out_stream, a)
-    ccall((:mlx_save_file, libmlxc), Cint, (Ptr{Libc.FILE}, mlx_array), out_stream, a)
+struct mlx_io_writer_
+    ctx::Ptr{Cvoid}
+end
+
+const mlx_io_writer = mlx_io_writer_
+
+function mlx_save_writer(out_stream, a)
+    ccall((:mlx_save_writer, libmlxc), Cint, (mlx_io_writer, mlx_array), out_stream, a)
 end
 
 function mlx_save(file, a)
     ccall((:mlx_save, libmlxc), Cint, (Ptr{Cchar}, mlx_array), file, a)
 end
 
-function mlx_save_safetensors_file(in_stream, param, metadata)
-    ccall((:mlx_save_safetensors_file, libmlxc), Cint, (Ptr{Libc.FILE}, mlx_map_string_to_array, mlx_map_string_to_string), in_stream, param, metadata)
+function mlx_save_safetensors_writer(in_stream, param, metadata)
+    ccall((:mlx_save_safetensors_writer, libmlxc), Cint, (mlx_io_writer, mlx_map_string_to_array, mlx_map_string_to_string), in_stream, param, metadata)
 end
 
 function mlx_save_safetensors(file, param, metadata)
     ccall((:mlx_save_safetensors, libmlxc), Cint, (Ptr{Cchar}, mlx_map_string_to_array, mlx_map_string_to_string), file, param, metadata)
+end
+
+struct mlx_io_vtable_
+    is_open::Ptr{Cvoid}
+    good::Ptr{Cvoid}
+    size_t::Cvoid
+    seek::Ptr{Cvoid}
+    read::Ptr{Cvoid}
+    read_at_offset::Ptr{Cvoid}
+    write::Ptr{Cvoid}
+    label::Ptr{Cvoid}
+    free::Ptr{Cvoid}
+end
+
+const mlx_io_vtable = mlx_io_vtable_
+
+function mlx_io_reader_new(desc, vtable)
+    ccall((:mlx_io_reader_new, libmlxc), mlx_io_reader, (Ptr{Cvoid}, mlx_io_vtable), desc, vtable)
+end
+
+function mlx_io_reader_descriptor(desc_, io)
+    ccall((:mlx_io_reader_descriptor, libmlxc), Cint, (Ptr{Ptr{Cvoid}}, mlx_io_reader), desc_, io)
+end
+
+function mlx_io_reader_tostring(str_, io)
+    ccall((:mlx_io_reader_tostring, libmlxc), Cint, (Ptr{mlx_string}, mlx_io_reader), str_, io)
+end
+
+function mlx_io_reader_free(io)
+    ccall((:mlx_io_reader_free, libmlxc), Cint, (mlx_io_reader,), io)
+end
+
+function mlx_io_writer_new(desc, vtable)
+    ccall((:mlx_io_writer_new, libmlxc), mlx_io_writer, (Ptr{Cvoid}, mlx_io_vtable), desc, vtable)
+end
+
+function mlx_io_writer_descriptor(desc_, io)
+    ccall((:mlx_io_writer_descriptor, libmlxc), Cint, (Ptr{Ptr{Cvoid}}, mlx_io_writer), desc_, io)
+end
+
+function mlx_io_writer_tostring(str_, io)
+    ccall((:mlx_io_writer_tostring, libmlxc), Cint, (Ptr{mlx_string}, mlx_io_writer), str_, io)
+end
+
+function mlx_io_writer_free(io)
+    ccall((:mlx_io_writer_free, libmlxc), Cint, (mlx_io_writer,), io)
 end
 
 function mlx_linalg_cholesky(res, a, upper, s)
@@ -826,16 +971,16 @@ function mlx_linalg_lu_factor(res_0, res_1, a, s)
     ccall((:mlx_linalg_lu_factor, libmlxc), Cint, (Ptr{mlx_array}, Ptr{mlx_array}, mlx_array, mlx_stream), res_0, res_1, a, s)
 end
 
-function mlx_linalg_norm_p(res, a, ord, axis, axis_num, keepdims, s)
-    ccall((:mlx_linalg_norm_p, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cdouble, Ptr{Cint}, Csize_t, Bool, mlx_stream), res, a, ord, axis, axis_num, keepdims, s)
+function mlx_linalg_norm(res, a, ord, axis, axis_num, keepdims, s)
+    ccall((:mlx_linalg_norm, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cdouble, Ptr{Cint}, Csize_t, Bool, mlx_stream), res, a, ord, axis, axis_num, keepdims, s)
 end
 
-function mlx_linalg_norm_ord(res, a, ord, axis, axis_num, keepdims, s)
-    ccall((:mlx_linalg_norm_ord, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Ptr{Cchar}, Ptr{Cint}, Csize_t, Bool, mlx_stream), res, a, ord, axis, axis_num, keepdims, s)
+function mlx_linalg_norm_matrix(res, a, ord, axis, axis_num, keepdims, s)
+    ccall((:mlx_linalg_norm_matrix, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Ptr{Cchar}, Ptr{Cint}, Csize_t, Bool, mlx_stream), res, a, ord, axis, axis_num, keepdims, s)
 end
 
-function mlx_linalg_norm(res, a, axis, axis_num, keepdims, s)
-    ccall((:mlx_linalg_norm, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Ptr{Cint}, Csize_t, Bool, mlx_stream), res, a, axis, axis_num, keepdims, s)
+function mlx_linalg_norm_l2(res, a, axis, axis_num, keepdims, s)
+    ccall((:mlx_linalg_norm_l2, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Ptr{Cint}, Csize_t, Bool, mlx_stream), res, a, axis, axis_num, keepdims, s)
 end
 
 function mlx_linalg_pinv(res, a, s)
@@ -854,8 +999,8 @@ function mlx_linalg_solve_triangular(res, a, b, upper, s)
     ccall((:mlx_linalg_solve_triangular, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_array, Bool, mlx_stream), res, a, b, upper, s)
 end
 
-function mlx_linalg_svd(res, a, s)
-    ccall((:mlx_linalg_svd, libmlxc), Cint, (Ptr{mlx_vector_array}, mlx_array, mlx_stream), res, a, s)
+function mlx_linalg_svd(res, a, compute_uv, s)
+    ccall((:mlx_linalg_svd, libmlxc), Cint, (Ptr{mlx_vector_array}, mlx_array, Bool, mlx_stream), res, a, compute_uv, s)
 end
 
 function mlx_linalg_tri_inv(res, a, upper, s)
@@ -940,9 +1085,42 @@ function mlx_map_string_to_string_iterator_next(key, value, it)
     ccall((:mlx_map_string_to_string_iterator_next, libmlxc), Cint, (Ptr{Ptr{Cchar}}, Ptr{Ptr{Cchar}}, mlx_map_string_to_string_iterator), key, value, it)
 end
 
-# no prototype is found for this function at metal.h:28:5, please use with caution
-function mlx_metal_clear_cache()
-    ccall((:mlx_metal_clear_cache, libmlxc), Cint, ())
+# no prototype is found for this function at memory.h:30:5, please use with caution
+function mlx_clear_cache()
+    ccall((:mlx_clear_cache, libmlxc), Cint, ())
+end
+
+function mlx_get_active_memory(res)
+    ccall((:mlx_get_active_memory, libmlxc), Cint, (Ptr{Csize_t},), res)
+end
+
+function mlx_get_cache_memory(res)
+    ccall((:mlx_get_cache_memory, libmlxc), Cint, (Ptr{Csize_t},), res)
+end
+
+function mlx_get_memory_limit(res)
+    ccall((:mlx_get_memory_limit, libmlxc), Cint, (Ptr{Csize_t},), res)
+end
+
+function mlx_get_peak_memory(res)
+    ccall((:mlx_get_peak_memory, libmlxc), Cint, (Ptr{Csize_t},), res)
+end
+
+# no prototype is found for this function at memory.h:35:5, please use with caution
+function mlx_reset_peak_memory()
+    ccall((:mlx_reset_peak_memory, libmlxc), Cint, ())
+end
+
+function mlx_set_cache_limit(res, limit)
+    ccall((:mlx_set_cache_limit, libmlxc), Cint, (Ptr{Csize_t}, Csize_t), res, limit)
+end
+
+function mlx_set_memory_limit(res, limit)
+    ccall((:mlx_set_memory_limit, libmlxc), Cint, (Ptr{Csize_t}, Csize_t), res, limit)
+end
+
+function mlx_set_wired_limit(res, limit)
+    ccall((:mlx_set_wired_limit, libmlxc), Cint, (Ptr{Csize_t}, Csize_t), res, limit)
 end
 
 struct mlx_metal_device_info_t_
@@ -954,49 +1132,20 @@ end
 
 const mlx_metal_device_info_t = mlx_metal_device_info_t_
 
-# no prototype is found for this function at metal.h:36:25, please use with caution
+# no prototype is found for this function at metal.h:37:25, please use with caution
 function mlx_metal_device_info()
     ccall((:mlx_metal_device_info, libmlxc), mlx_metal_device_info_t, ())
-end
-
-function mlx_metal_get_active_memory(res)
-    ccall((:mlx_metal_get_active_memory, libmlxc), Cint, (Ptr{Csize_t},), res)
-end
-
-function mlx_metal_get_cache_memory(res)
-    ccall((:mlx_metal_get_cache_memory, libmlxc), Cint, (Ptr{Csize_t},), res)
-end
-
-function mlx_metal_get_peak_memory(res)
-    ccall((:mlx_metal_get_peak_memory, libmlxc), Cint, (Ptr{Csize_t},), res)
 end
 
 function mlx_metal_is_available(res)
     ccall((:mlx_metal_is_available, libmlxc), Cint, (Ptr{Bool},), res)
 end
 
-# no prototype is found for this function at metal.h:42:5, please use with caution
-function mlx_metal_reset_peak_memory()
-    ccall((:mlx_metal_reset_peak_memory, libmlxc), Cint, ())
-end
-
-function mlx_metal_set_cache_limit(res, limit)
-    ccall((:mlx_metal_set_cache_limit, libmlxc), Cint, (Ptr{Csize_t}, Csize_t), res, limit)
-end
-
-function mlx_metal_set_memory_limit(res, limit, relaxed)
-    ccall((:mlx_metal_set_memory_limit, libmlxc), Cint, (Ptr{Csize_t}, Csize_t, Bool), res, limit, relaxed)
-end
-
-function mlx_metal_set_wired_limit(res, limit)
-    ccall((:mlx_metal_set_wired_limit, libmlxc), Cint, (Ptr{Csize_t}, Csize_t), res, limit)
-end
-
 function mlx_metal_start_capture(path)
     ccall((:mlx_metal_start_capture, libmlxc), Cint, (Ptr{Cchar},), path)
 end
 
-# no prototype is found for this function at metal.h:47:5, please use with caution
+# no prototype is found for this function at metal.h:41:5, please use with caution
 function mlx_metal_stop_capture()
     ccall((:mlx_metal_stop_capture, libmlxc), Cint, ())
 end
@@ -1021,20 +1170,24 @@ function mlx_all_axis(res, a, axis, keepdims, s)
     ccall((:mlx_all_axis, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cint, Bool, mlx_stream), res, a, axis, keepdims, s)
 end
 
-function mlx_all_all(res, a, keepdims, s)
-    ccall((:mlx_all_all, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Bool, mlx_stream), res, a, keepdims, s)
+function mlx_all(res, a, keepdims, s)
+    ccall((:mlx_all, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Bool, mlx_stream), res, a, keepdims, s)
 end
 
 function mlx_allclose(res, a, b, rtol, atol, equal_nan, s)
     ccall((:mlx_allclose, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_array, Cdouble, Cdouble, Bool, mlx_stream), res, a, b, rtol, atol, equal_nan, s)
 end
 
-function mlx_any(res, a, axes, axes_num, keepdims, s)
-    ccall((:mlx_any, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Ptr{Cint}, Csize_t, Bool, mlx_stream), res, a, axes, axes_num, keepdims, s)
+function mlx_any_axes(res, a, axes, axes_num, keepdims, s)
+    ccall((:mlx_any_axes, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Ptr{Cint}, Csize_t, Bool, mlx_stream), res, a, axes, axes_num, keepdims, s)
 end
 
-function mlx_any_all(res, a, keepdims, s)
-    ccall((:mlx_any_all, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Bool, mlx_stream), res, a, keepdims, s)
+function mlx_any_axis(res, a, axis, keepdims, s)
+    ccall((:mlx_any_axis, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cint, Bool, mlx_stream), res, a, axis, keepdims, s)
+end
+
+function mlx_any(res, a, keepdims, s)
+    ccall((:mlx_any, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Bool, mlx_stream), res, a, keepdims, s)
 end
 
 function mlx_arange(res, start, stop, step, dtype, s)
@@ -1069,36 +1222,36 @@ function mlx_arctanh(res, a, s)
     ccall((:mlx_arctanh, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_stream), res, a, s)
 end
 
-function mlx_argmax(res, a, axis, keepdims, s)
-    ccall((:mlx_argmax, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cint, Bool, mlx_stream), res, a, axis, keepdims, s)
+function mlx_argmax_axis(res, a, axis, keepdims, s)
+    ccall((:mlx_argmax_axis, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cint, Bool, mlx_stream), res, a, axis, keepdims, s)
 end
 
-function mlx_argmax_all(res, a, keepdims, s)
-    ccall((:mlx_argmax_all, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Bool, mlx_stream), res, a, keepdims, s)
+function mlx_argmax(res, a, keepdims, s)
+    ccall((:mlx_argmax, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Bool, mlx_stream), res, a, keepdims, s)
 end
 
-function mlx_argmin(res, a, axis, keepdims, s)
-    ccall((:mlx_argmin, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cint, Bool, mlx_stream), res, a, axis, keepdims, s)
+function mlx_argmin_axis(res, a, axis, keepdims, s)
+    ccall((:mlx_argmin_axis, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cint, Bool, mlx_stream), res, a, axis, keepdims, s)
 end
 
-function mlx_argmin_all(res, a, keepdims, s)
-    ccall((:mlx_argmin_all, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Bool, mlx_stream), res, a, keepdims, s)
+function mlx_argmin(res, a, keepdims, s)
+    ccall((:mlx_argmin, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Bool, mlx_stream), res, a, keepdims, s)
 end
 
-function mlx_argpartition(res, a, kth, axis, s)
-    ccall((:mlx_argpartition, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cint, Cint, mlx_stream), res, a, kth, axis, s)
+function mlx_argpartition_axis(res, a, kth, axis, s)
+    ccall((:mlx_argpartition_axis, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cint, Cint, mlx_stream), res, a, kth, axis, s)
 end
 
-function mlx_argpartition_all(res, a, kth, s)
-    ccall((:mlx_argpartition_all, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cint, mlx_stream), res, a, kth, s)
+function mlx_argpartition(res, a, kth, s)
+    ccall((:mlx_argpartition, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cint, mlx_stream), res, a, kth, s)
 end
 
-function mlx_argsort(res, a, axis, s)
-    ccall((:mlx_argsort, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cint, mlx_stream), res, a, axis, s)
+function mlx_argsort_axis(res, a, axis, s)
+    ccall((:mlx_argsort_axis, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cint, mlx_stream), res, a, axis, s)
 end
 
-function mlx_argsort_all(res, a, s)
-    ccall((:mlx_argsort_all, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_stream), res, a, s)
+function mlx_argsort(res, a, s)
+    ccall((:mlx_argsort, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_stream), res, a, s)
 end
 
 function mlx_array_equal(res, a, b, equal_nan, s)
@@ -1161,12 +1314,12 @@ function mlx_clip(res, a, a_min, a_max, s)
     ccall((:mlx_clip, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_array, mlx_array, mlx_stream), res, a, a_min, a_max, s)
 end
 
-function mlx_concatenate(res, arrays, axis, s)
-    ccall((:mlx_concatenate, libmlxc), Cint, (Ptr{mlx_array}, mlx_vector_array, Cint, mlx_stream), res, arrays, axis, s)
+function mlx_concatenate_axis(res, arrays, axis, s)
+    ccall((:mlx_concatenate_axis, libmlxc), Cint, (Ptr{mlx_array}, mlx_vector_array, Cint, mlx_stream), res, arrays, axis, s)
 end
 
-function mlx_concatenate_all(res, arrays, s)
-    ccall((:mlx_concatenate_all, libmlxc), Cint, (Ptr{mlx_array}, mlx_vector_array, mlx_stream), res, arrays, s)
+function mlx_concatenate(res, arrays, s)
+    ccall((:mlx_concatenate, libmlxc), Cint, (Ptr{mlx_array}, mlx_vector_array, mlx_stream), res, arrays, s)
 end
 
 function mlx_conjugate(res, a, s)
@@ -1193,16 +1346,16 @@ function mlx_conv_general(res, input, weight, stride, stride_num, padding_lo, pa
     ccall((:mlx_conv_general, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_array, Ptr{Cint}, Csize_t, Ptr{Cint}, Csize_t, Ptr{Cint}, Csize_t, Ptr{Cint}, Csize_t, Ptr{Cint}, Csize_t, Cint, Bool, mlx_stream), res, input, weight, stride, stride_num, padding_lo, padding_lo_num, padding_hi, padding_hi_num, kernel_dilation, kernel_dilation_num, input_dilation, input_dilation_num, groups, flip, s)
 end
 
-function mlx_conv_transpose1d(res, input, weight, stride, padding, dilation, groups, s)
-    ccall((:mlx_conv_transpose1d, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_array, Cint, Cint, Cint, Cint, mlx_stream), res, input, weight, stride, padding, dilation, groups, s)
+function mlx_conv_transpose1d(res, input, weight, stride, padding, dilation, output_padding, groups, s)
+    ccall((:mlx_conv_transpose1d, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_array, Cint, Cint, Cint, Cint, Cint, mlx_stream), res, input, weight, stride, padding, dilation, output_padding, groups, s)
 end
 
-function mlx_conv_transpose2d(res, input, weight, stride_0, stride_1, padding_0, padding_1, dilation_0, dilation_1, groups, s)
-    ccall((:mlx_conv_transpose2d, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_array, Cint, Cint, Cint, Cint, Cint, Cint, Cint, mlx_stream), res, input, weight, stride_0, stride_1, padding_0, padding_1, dilation_0, dilation_1, groups, s)
+function mlx_conv_transpose2d(res, input, weight, stride_0, stride_1, padding_0, padding_1, dilation_0, dilation_1, output_padding_0, output_padding_1, groups, s)
+    ccall((:mlx_conv_transpose2d, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_array, Cint, Cint, Cint, Cint, Cint, Cint, Cint, Cint, Cint, mlx_stream), res, input, weight, stride_0, stride_1, padding_0, padding_1, dilation_0, dilation_1, output_padding_0, output_padding_1, groups, s)
 end
 
-function mlx_conv_transpose3d(res, input, weight, stride_0, stride_1, stride_2, padding_0, padding_1, padding_2, dilation_0, dilation_1, dilation_2, groups, s)
-    ccall((:mlx_conv_transpose3d, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_array, Cint, Cint, Cint, Cint, Cint, Cint, Cint, Cint, Cint, Cint, mlx_stream), res, input, weight, stride_0, stride_1, stride_2, padding_0, padding_1, padding_2, dilation_0, dilation_1, dilation_2, groups, s)
+function mlx_conv_transpose3d(res, input, weight, stride_0, stride_1, stride_2, padding_0, padding_1, padding_2, dilation_0, dilation_1, dilation_2, output_padding_0, output_padding_1, output_padding_2, groups, s)
+    ccall((:mlx_conv_transpose3d, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_array, Cint, Cint, Cint, Cint, Cint, Cint, Cint, Cint, Cint, Cint, Cint, Cint, Cint, mlx_stream), res, input, weight, stride_0, stride_1, stride_2, padding_0, padding_1, padding_2, dilation_0, dilation_1, dilation_2, output_padding_0, output_padding_1, output_padding_2, groups, s)
 end
 
 function mlx_copy(res, a, s)
@@ -1281,8 +1434,12 @@ function mlx_exp(res, a, s)
     ccall((:mlx_exp, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_stream), res, a, s)
 end
 
-function mlx_expand_dims(res, a, axes, axes_num, s)
-    ccall((:mlx_expand_dims, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Ptr{Cint}, Csize_t, mlx_stream), res, a, axes, axes_num, s)
+function mlx_expand_dims_axes(res, a, axes, axes_num, s)
+    ccall((:mlx_expand_dims_axes, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Ptr{Cint}, Csize_t, mlx_stream), res, a, axes, axes_num, s)
+end
+
+function mlx_expand_dims(res, a, axis, s)
+    ccall((:mlx_expand_dims, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cint, mlx_stream), res, a, axis, s)
 end
 
 function mlx_expm1(res, a, s)
@@ -1313,12 +1470,12 @@ function mlx_gather(res, a, indices, axes, axes_num, slice_sizes, slice_sizes_nu
     ccall((:mlx_gather, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_vector_array, Ptr{Cint}, Csize_t, Ptr{Cint}, Csize_t, mlx_stream), res, a, indices, axes, axes_num, slice_sizes, slice_sizes_num, s)
 end
 
-function mlx_gather_mm(res, a, b, lhs_indices, rhs_indices, s)
-    ccall((:mlx_gather_mm, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_array, mlx_array, mlx_array, mlx_stream), res, a, b, lhs_indices, rhs_indices, s)
+function mlx_gather_mm(res, a, b, lhs_indices, rhs_indices, sorted_indices, s)
+    ccall((:mlx_gather_mm, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_array, mlx_array, mlx_array, Bool, mlx_stream), res, a, b, lhs_indices, rhs_indices, sorted_indices, s)
 end
 
-function mlx_gather_qmm(res, x, w, scales, biases, lhs_indices, rhs_indices, transpose, group_size, bits, s)
-    ccall((:mlx_gather_qmm, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_array, mlx_array, mlx_array, mlx_array, mlx_array, Bool, Cint, Cint, mlx_stream), res, x, w, scales, biases, lhs_indices, rhs_indices, transpose, group_size, bits, s)
+function mlx_gather_qmm(res, x, w, scales, biases, lhs_indices, rhs_indices, transpose, group_size, bits, sorted_indices, s)
+    ccall((:mlx_gather_qmm, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_array, mlx_array, mlx_array, mlx_array, mlx_array, Bool, Cint, Cint, Bool, mlx_stream), res, x, w, scales, biases, lhs_indices, rhs_indices, transpose, group_size, bits, sorted_indices, s)
 end
 
 function mlx_greater(res, a, b, s)
@@ -1409,6 +1566,10 @@ function mlx_logaddexp(res, a, b, s)
     ccall((:mlx_logaddexp, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_array, mlx_stream), res, a, b, s)
 end
 
+function mlx_logcumsumexp(res, a, axis, reverse, inclusive, s)
+    ccall((:mlx_logcumsumexp, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cint, Bool, Bool, mlx_stream), res, a, axis, reverse, inclusive, s)
+end
+
 function mlx_logical_and(res, a, b, s)
     ccall((:mlx_logical_and, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_array, mlx_stream), res, a, b, s)
 end
@@ -1421,48 +1582,64 @@ function mlx_logical_or(res, a, b, s)
     ccall((:mlx_logical_or, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_array, mlx_stream), res, a, b, s)
 end
 
-function mlx_logsumexp(res, a, axes, axes_num, keepdims, s)
-    ccall((:mlx_logsumexp, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Ptr{Cint}, Csize_t, Bool, mlx_stream), res, a, axes, axes_num, keepdims, s)
+function mlx_logsumexp_axes(res, a, axes, axes_num, keepdims, s)
+    ccall((:mlx_logsumexp_axes, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Ptr{Cint}, Csize_t, Bool, mlx_stream), res, a, axes, axes_num, keepdims, s)
 end
 
-function mlx_logsumexp_all(res, a, keepdims, s)
-    ccall((:mlx_logsumexp_all, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Bool, mlx_stream), res, a, keepdims, s)
+function mlx_logsumexp_axis(res, a, axis, keepdims, s)
+    ccall((:mlx_logsumexp_axis, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cint, Bool, mlx_stream), res, a, axis, keepdims, s)
+end
+
+function mlx_logsumexp(res, a, keepdims, s)
+    ccall((:mlx_logsumexp, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Bool, mlx_stream), res, a, keepdims, s)
 end
 
 function mlx_matmul(res, a, b, s)
     ccall((:mlx_matmul, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_array, mlx_stream), res, a, b, s)
 end
 
-function mlx_max(res, a, axes, axes_num, keepdims, s)
-    ccall((:mlx_max, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Ptr{Cint}, Csize_t, Bool, mlx_stream), res, a, axes, axes_num, keepdims, s)
+function mlx_max_axes(res, a, axes, axes_num, keepdims, s)
+    ccall((:mlx_max_axes, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Ptr{Cint}, Csize_t, Bool, mlx_stream), res, a, axes, axes_num, keepdims, s)
 end
 
-function mlx_max_all(res, a, keepdims, s)
-    ccall((:mlx_max_all, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Bool, mlx_stream), res, a, keepdims, s)
+function mlx_max_axis(res, a, axis, keepdims, s)
+    ccall((:mlx_max_axis, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cint, Bool, mlx_stream), res, a, axis, keepdims, s)
+end
+
+function mlx_max(res, a, keepdims, s)
+    ccall((:mlx_max, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Bool, mlx_stream), res, a, keepdims, s)
 end
 
 function mlx_maximum(res, a, b, s)
     ccall((:mlx_maximum, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_array, mlx_stream), res, a, b, s)
 end
 
-function mlx_mean(res, a, axes, axes_num, keepdims, s)
-    ccall((:mlx_mean, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Ptr{Cint}, Csize_t, Bool, mlx_stream), res, a, axes, axes_num, keepdims, s)
+function mlx_mean_axes(res, a, axes, axes_num, keepdims, s)
+    ccall((:mlx_mean_axes, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Ptr{Cint}, Csize_t, Bool, mlx_stream), res, a, axes, axes_num, keepdims, s)
 end
 
-function mlx_mean_all(res, a, keepdims, s)
-    ccall((:mlx_mean_all, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Bool, mlx_stream), res, a, keepdims, s)
+function mlx_mean_axis(res, a, axis, keepdims, s)
+    ccall((:mlx_mean_axis, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cint, Bool, mlx_stream), res, a, axis, keepdims, s)
+end
+
+function mlx_mean(res, a, keepdims, s)
+    ccall((:mlx_mean, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Bool, mlx_stream), res, a, keepdims, s)
 end
 
 function mlx_meshgrid(res, arrays, sparse, indexing, s)
     ccall((:mlx_meshgrid, libmlxc), Cint, (Ptr{mlx_vector_array}, mlx_vector_array, Bool, Ptr{Cchar}, mlx_stream), res, arrays, sparse, indexing, s)
 end
 
-function mlx_min(res, a, axes, axes_num, keepdims, s)
-    ccall((:mlx_min, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Ptr{Cint}, Csize_t, Bool, mlx_stream), res, a, axes, axes_num, keepdims, s)
+function mlx_min_axes(res, a, axes, axes_num, keepdims, s)
+    ccall((:mlx_min_axes, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Ptr{Cint}, Csize_t, Bool, mlx_stream), res, a, axes, axes_num, keepdims, s)
 end
 
-function mlx_min_all(res, a, keepdims, s)
-    ccall((:mlx_min_all, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Bool, mlx_stream), res, a, keepdims, s)
+function mlx_min_axis(res, a, axis, keepdims, s)
+    ccall((:mlx_min_axis, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cint, Bool, mlx_stream), res, a, axis, keepdims, s)
+end
+
+function mlx_min(res, a, keepdims, s)
+    ccall((:mlx_min, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Bool, mlx_stream), res, a, keepdims, s)
 end
 
 function mlx_minimum(res, a, b, s)
@@ -1509,24 +1686,32 @@ function mlx_pad(res, a, axes, axes_num, low_pad_size, low_pad_size_num, high_pa
     ccall((:mlx_pad, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Ptr{Cint}, Csize_t, Ptr{Cint}, Csize_t, Ptr{Cint}, Csize_t, mlx_array, Ptr{Cchar}, mlx_stream), res, a, axes, axes_num, low_pad_size, low_pad_size_num, high_pad_size, high_pad_size_num, pad_value, mode, s)
 end
 
-function mlx_partition(res, a, kth, axis, s)
-    ccall((:mlx_partition, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cint, Cint, mlx_stream), res, a, kth, axis, s)
+function mlx_pad_symmetric(res, a, pad_width, pad_value, mode, s)
+    ccall((:mlx_pad_symmetric, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cint, mlx_array, Ptr{Cchar}, mlx_stream), res, a, pad_width, pad_value, mode, s)
 end
 
-function mlx_partition_all(res, a, kth, s)
-    ccall((:mlx_partition_all, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cint, mlx_stream), res, a, kth, s)
+function mlx_partition_axis(res, a, kth, axis, s)
+    ccall((:mlx_partition_axis, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cint, Cint, mlx_stream), res, a, kth, axis, s)
+end
+
+function mlx_partition(res, a, kth, s)
+    ccall((:mlx_partition, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cint, mlx_stream), res, a, kth, s)
 end
 
 function mlx_power(res, a, b, s)
     ccall((:mlx_power, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_array, mlx_stream), res, a, b, s)
 end
 
-function mlx_prod(res, a, axes, axes_num, keepdims, s)
-    ccall((:mlx_prod, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Ptr{Cint}, Csize_t, Bool, mlx_stream), res, a, axes, axes_num, keepdims, s)
+function mlx_prod_axes(res, a, axes, axes_num, keepdims, s)
+    ccall((:mlx_prod_axes, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Ptr{Cint}, Csize_t, Bool, mlx_stream), res, a, axes, axes_num, keepdims, s)
 end
 
-function mlx_prod_all(res, a, keepdims, s)
-    ccall((:mlx_prod_all, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Bool, mlx_stream), res, a, keepdims, s)
+function mlx_prod_axis(res, a, axis, keepdims, s)
+    ccall((:mlx_prod_axis, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cint, Bool, mlx_stream), res, a, axis, keepdims, s)
+end
+
+function mlx_prod(res, a, keepdims, s)
+    ccall((:mlx_prod, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Bool, mlx_stream), res, a, keepdims, s)
 end
 
 function mlx_put_along_axis(res, a, indices, values, axis, s)
@@ -1557,12 +1742,12 @@ function mlx_remainder(res, a, b, s)
     ccall((:mlx_remainder, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_array, mlx_stream), res, a, b, s)
 end
 
-function mlx_repeat(res, arr, repeats, axis, s)
-    ccall((:mlx_repeat, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cint, Cint, mlx_stream), res, arr, repeats, axis, s)
+function mlx_repeat_axis(res, arr, repeats, axis, s)
+    ccall((:mlx_repeat_axis, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cint, Cint, mlx_stream), res, arr, repeats, axis, s)
 end
 
-function mlx_repeat_all(res, arr, repeats, s)
-    ccall((:mlx_repeat_all, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cint, mlx_stream), res, arr, repeats, s)
+function mlx_repeat(res, arr, repeats, s)
+    ccall((:mlx_repeat, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cint, mlx_stream), res, arr, repeats, s)
 end
 
 function mlx_reshape(res, a, shape, shape_num, s)
@@ -1573,12 +1758,16 @@ function mlx_right_shift(res, a, b, s)
     ccall((:mlx_right_shift, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_array, mlx_stream), res, a, b, s)
 end
 
-function mlx_roll(res, a, shift, axes, axes_num, s)
-    ccall((:mlx_roll, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cint, Ptr{Cint}, Csize_t, mlx_stream), res, a, shift, axes, axes_num, s)
+function mlx_roll_axis(res, a, shift, shift_num, axis, s)
+    ccall((:mlx_roll_axis, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Ptr{Cint}, Csize_t, Cint, mlx_stream), res, a, shift, shift_num, axis, s)
 end
 
-function mlx_roll_all(res, a, shift, s)
-    ccall((:mlx_roll_all, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cint, mlx_stream), res, a, shift, s)
+function mlx_roll_axes(res, a, shift, shift_num, axes, axes_num, s)
+    ccall((:mlx_roll_axes, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Ptr{Cint}, Csize_t, Ptr{Cint}, Csize_t, mlx_stream), res, a, shift, shift_num, axes, axes_num, s)
+end
+
+function mlx_roll(res, a, shift, shift_num, s)
+    ccall((:mlx_roll, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Ptr{Cint}, Csize_t, mlx_stream), res, a, shift, shift_num, s)
 end
 
 function mlx_round(res, a, decimals, s)
@@ -1633,32 +1822,44 @@ function mlx_slice(res, a, start, start_num, stop, stop_num, strides, strides_nu
     ccall((:mlx_slice, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Ptr{Cint}, Csize_t, Ptr{Cint}, Csize_t, Ptr{Cint}, Csize_t, mlx_stream), res, a, start, start_num, stop, stop_num, strides, strides_num, s)
 end
 
+function mlx_slice_dynamic(res, a, start, axes, axes_num, slice_size, slice_size_num, s)
+    ccall((:mlx_slice_dynamic, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_array, Ptr{Cint}, Csize_t, Ptr{Cint}, Csize_t, mlx_stream), res, a, start, axes, axes_num, slice_size, slice_size_num, s)
+end
+
 function mlx_slice_update(res, src, update, start, start_num, stop, stop_num, strides, strides_num, s)
     ccall((:mlx_slice_update, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_array, Ptr{Cint}, Csize_t, Ptr{Cint}, Csize_t, Ptr{Cint}, Csize_t, mlx_stream), res, src, update, start, start_num, stop, stop_num, strides, strides_num, s)
 end
 
-function mlx_softmax(res, a, axes, axes_num, precise, s)
-    ccall((:mlx_softmax, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Ptr{Cint}, Csize_t, Bool, mlx_stream), res, a, axes, axes_num, precise, s)
+function mlx_slice_update_dynamic(res, src, update, start, axes, axes_num, s)
+    ccall((:mlx_slice_update_dynamic, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_array, mlx_array, Ptr{Cint}, Csize_t, mlx_stream), res, src, update, start, axes, axes_num, s)
 end
 
-function mlx_softmax_all(res, a, precise, s)
-    ccall((:mlx_softmax_all, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Bool, mlx_stream), res, a, precise, s)
+function mlx_softmax_axes(res, a, axes, axes_num, precise, s)
+    ccall((:mlx_softmax_axes, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Ptr{Cint}, Csize_t, Bool, mlx_stream), res, a, axes, axes_num, precise, s)
 end
 
-function mlx_sort(res, a, axis, s)
-    ccall((:mlx_sort, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cint, mlx_stream), res, a, axis, s)
+function mlx_softmax_axis(res, a, axis, precise, s)
+    ccall((:mlx_softmax_axis, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cint, Bool, mlx_stream), res, a, axis, precise, s)
 end
 
-function mlx_sort_all(res, a, s)
-    ccall((:mlx_sort_all, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_stream), res, a, s)
+function mlx_softmax(res, a, precise, s)
+    ccall((:mlx_softmax, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Bool, mlx_stream), res, a, precise, s)
 end
 
-function mlx_split_equal_parts(res, a, num_splits, axis, s)
-    ccall((:mlx_split_equal_parts, libmlxc), Cint, (Ptr{mlx_vector_array}, mlx_array, Cint, Cint, mlx_stream), res, a, num_splits, axis, s)
+function mlx_sort_axis(res, a, axis, s)
+    ccall((:mlx_sort_axis, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cint, mlx_stream), res, a, axis, s)
 end
 
-function mlx_split(res, a, indices, indices_num, axis, s)
-    ccall((:mlx_split, libmlxc), Cint, (Ptr{mlx_vector_array}, mlx_array, Ptr{Cint}, Csize_t, Cint, mlx_stream), res, a, indices, indices_num, axis, s)
+function mlx_sort(res, a, s)
+    ccall((:mlx_sort, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_stream), res, a, s)
+end
+
+function mlx_split(res, a, num_splits, axis, s)
+    ccall((:mlx_split, libmlxc), Cint, (Ptr{mlx_vector_array}, mlx_array, Cint, Cint, mlx_stream), res, a, num_splits, axis, s)
+end
+
+function mlx_split_sections(res, a, indices, indices_num, axis, s)
+    ccall((:mlx_split_sections, libmlxc), Cint, (Ptr{mlx_vector_array}, mlx_array, Ptr{Cint}, Csize_t, Cint, mlx_stream), res, a, indices, indices_num, axis, s)
 end
 
 function mlx_sqrt(res, a, s)
@@ -1669,28 +1870,36 @@ function mlx_square(res, a, s)
     ccall((:mlx_square, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_stream), res, a, s)
 end
 
-function mlx_squeeze(res, a, axes, axes_num, s)
-    ccall((:mlx_squeeze, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Ptr{Cint}, Csize_t, mlx_stream), res, a, axes, axes_num, s)
+function mlx_squeeze_axes(res, a, axes, axes_num, s)
+    ccall((:mlx_squeeze_axes, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Ptr{Cint}, Csize_t, mlx_stream), res, a, axes, axes_num, s)
 end
 
-function mlx_squeeze_all(res, a, s)
-    ccall((:mlx_squeeze_all, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_stream), res, a, s)
+function mlx_squeeze_axis(res, a, axis, s)
+    ccall((:mlx_squeeze_axis, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cint, mlx_stream), res, a, axis, s)
 end
 
-function mlx_stack(res, arrays, axis, s)
-    ccall((:mlx_stack, libmlxc), Cint, (Ptr{mlx_array}, mlx_vector_array, Cint, mlx_stream), res, arrays, axis, s)
+function mlx_squeeze(res, a, s)
+    ccall((:mlx_squeeze, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_stream), res, a, s)
 end
 
-function mlx_stack_all(res, arrays, s)
-    ccall((:mlx_stack_all, libmlxc), Cint, (Ptr{mlx_array}, mlx_vector_array, mlx_stream), res, arrays, s)
+function mlx_stack_axis(res, arrays, axis, s)
+    ccall((:mlx_stack_axis, libmlxc), Cint, (Ptr{mlx_array}, mlx_vector_array, Cint, mlx_stream), res, arrays, axis, s)
 end
 
-function mlx_std(res, a, axes, axes_num, keepdims, ddof, s)
-    ccall((:mlx_std, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Ptr{Cint}, Csize_t, Bool, Cint, mlx_stream), res, a, axes, axes_num, keepdims, ddof, s)
+function mlx_stack(res, arrays, s)
+    ccall((:mlx_stack, libmlxc), Cint, (Ptr{mlx_array}, mlx_vector_array, mlx_stream), res, arrays, s)
 end
 
-function mlx_std_all(res, a, keepdims, ddof, s)
-    ccall((:mlx_std_all, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Bool, Cint, mlx_stream), res, a, keepdims, ddof, s)
+function mlx_std_axes(res, a, axes, axes_num, keepdims, ddof, s)
+    ccall((:mlx_std_axes, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Ptr{Cint}, Csize_t, Bool, Cint, mlx_stream), res, a, axes, axes_num, keepdims, ddof, s)
+end
+
+function mlx_std_axis(res, a, axis, keepdims, ddof, s)
+    ccall((:mlx_std_axis, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cint, Bool, Cint, mlx_stream), res, a, axis, keepdims, ddof, s)
+end
+
+function mlx_std(res, a, keepdims, ddof, s)
+    ccall((:mlx_std, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Bool, Cint, mlx_stream), res, a, keepdims, ddof, s)
 end
 
 function mlx_stop_gradient(res, a, s)
@@ -1701,24 +1910,28 @@ function mlx_subtract(res, a, b, s)
     ccall((:mlx_subtract, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_array, mlx_stream), res, a, b, s)
 end
 
-function mlx_sum(res, a, axes, axes_num, keepdims, s)
-    ccall((:mlx_sum, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Ptr{Cint}, Csize_t, Bool, mlx_stream), res, a, axes, axes_num, keepdims, s)
+function mlx_sum_axes(res, a, axes, axes_num, keepdims, s)
+    ccall((:mlx_sum_axes, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Ptr{Cint}, Csize_t, Bool, mlx_stream), res, a, axes, axes_num, keepdims, s)
 end
 
-function mlx_sum_all(res, a, keepdims, s)
-    ccall((:mlx_sum_all, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Bool, mlx_stream), res, a, keepdims, s)
+function mlx_sum_axis(res, a, axis, keepdims, s)
+    ccall((:mlx_sum_axis, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cint, Bool, mlx_stream), res, a, axis, keepdims, s)
+end
+
+function mlx_sum(res, a, keepdims, s)
+    ccall((:mlx_sum, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Bool, mlx_stream), res, a, keepdims, s)
 end
 
 function mlx_swapaxes(res, a, axis1, axis2, s)
     ccall((:mlx_swapaxes, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cint, Cint, mlx_stream), res, a, axis1, axis2, s)
 end
 
-function mlx_take(res, a, indices, axis, s)
-    ccall((:mlx_take, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_array, Cint, mlx_stream), res, a, indices, axis, s)
+function mlx_take_axis(res, a, indices, axis, s)
+    ccall((:mlx_take_axis, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_array, Cint, mlx_stream), res, a, indices, axis, s)
 end
 
-function mlx_take_all(res, a, indices, s)
-    ccall((:mlx_take_all, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_array, mlx_stream), res, a, indices, s)
+function mlx_take(res, a, indices, s)
+    ccall((:mlx_take, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_array, mlx_stream), res, a, indices, s)
 end
 
 function mlx_take_along_axis(res, a, indices, axis, s)
@@ -1737,32 +1950,32 @@ function mlx_tensordot(res, a, b, axes_a, axes_a_num, axes_b, axes_b_num, s)
     ccall((:mlx_tensordot, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_array, Ptr{Cint}, Csize_t, Ptr{Cint}, Csize_t, mlx_stream), res, a, b, axes_a, axes_a_num, axes_b, axes_b_num, s)
 end
 
-function mlx_tensordot_along_axis(res, a, b, axis, s)
-    ccall((:mlx_tensordot_along_axis, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_array, Cint, mlx_stream), res, a, b, axis, s)
+function mlx_tensordot_axis(res, a, b, axis, s)
+    ccall((:mlx_tensordot_axis, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_array, Cint, mlx_stream), res, a, b, axis, s)
 end
 
 function mlx_tile(res, arr, reps, reps_num, s)
     ccall((:mlx_tile, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Ptr{Cint}, Csize_t, mlx_stream), res, arr, reps, reps_num, s)
 end
 
-function mlx_topk(res, a, k, axis, s)
-    ccall((:mlx_topk, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cint, Cint, mlx_stream), res, a, k, axis, s)
+function mlx_topk_axis(res, a, k, axis, s)
+    ccall((:mlx_topk_axis, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cint, Cint, mlx_stream), res, a, k, axis, s)
 end
 
-function mlx_topk_all(res, a, k, s)
-    ccall((:mlx_topk_all, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cint, mlx_stream), res, a, k, s)
+function mlx_topk(res, a, k, s)
+    ccall((:mlx_topk, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cint, mlx_stream), res, a, k, s)
 end
 
 function mlx_trace(res, a, offset, axis1, axis2, dtype, s)
     ccall((:mlx_trace, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cint, Cint, Cint, mlx_dtype, mlx_stream), res, a, offset, axis1, axis2, dtype, s)
 end
 
-function mlx_transpose(res, a, axes, axes_num, s)
-    ccall((:mlx_transpose, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Ptr{Cint}, Csize_t, mlx_stream), res, a, axes, axes_num, s)
+function mlx_transpose_axes(res, a, axes, axes_num, s)
+    ccall((:mlx_transpose_axes, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Ptr{Cint}, Csize_t, mlx_stream), res, a, axes, axes_num, s)
 end
 
-function mlx_transpose_all(res, a, s)
-    ccall((:mlx_transpose_all, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_stream), res, a, s)
+function mlx_transpose(res, a, s)
+    ccall((:mlx_transpose, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_stream), res, a, s)
 end
 
 function mlx_tri(res, n, m, k, type, s)
@@ -1781,12 +1994,16 @@ function mlx_unflatten(res, a, axis, shape, shape_num, s)
     ccall((:mlx_unflatten, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cint, Ptr{Cint}, Csize_t, mlx_stream), res, a, axis, shape, shape_num, s)
 end
 
-function mlx_var(res, a, axes, axes_num, keepdims, ddof, s)
-    ccall((:mlx_var, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Ptr{Cint}, Csize_t, Bool, Cint, mlx_stream), res, a, axes, axes_num, keepdims, ddof, s)
+function mlx_var_axes(res, a, axes, axes_num, keepdims, ddof, s)
+    ccall((:mlx_var_axes, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Ptr{Cint}, Csize_t, Bool, Cint, mlx_stream), res, a, axes, axes_num, keepdims, ddof, s)
 end
 
-function mlx_var_all(res, a, keepdims, ddof, s)
-    ccall((:mlx_var_all, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Bool, Cint, mlx_stream), res, a, keepdims, ddof, s)
+function mlx_var_axis(res, a, axis, keepdims, ddof, s)
+    ccall((:mlx_var_axis, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Cint, Bool, Cint, mlx_stream), res, a, axis, keepdims, ddof, s)
+end
+
+function mlx_var(res, a, keepdims, ddof, s)
+    ccall((:mlx_var, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Bool, Cint, mlx_stream), res, a, keepdims, ddof, s)
 end
 
 function mlx_view(res, a, dtype, s)
@@ -1804,6 +2021,13 @@ end
 function mlx_zeros_like(res, a, s)
     ccall((:mlx_zeros_like, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, mlx_stream), res, a, s)
 end
+
+struct mlx_optional_int_
+    value::Cint
+    has_value::Bool
+end
+
+const mlx_optional_int = mlx_optional_int_
 
 function mlx_random_bernoulli(res, p, shape, shape_num, key, s)
     ccall((:mlx_random_bernoulli, libmlxc), Cint, (Ptr{mlx_array}, mlx_array, Ptr{Cint}, Csize_t, mlx_array, mlx_stream), res, p, shape, shape_num, key, s)
@@ -2134,12 +2358,6 @@ function mlx_vector_int_get(res, vec, idx)
     ccall((:mlx_vector_int_get, libmlxc), Cint, (Ptr{Cint}, mlx_vector_int, Csize_t), res, vec, idx)
 end
 
-struct mlx_vector_string_
-    ctx::Ptr{Cvoid}
-end
-
-const mlx_vector_string = mlx_vector_string_
-
 # no prototype is found for this function at vector.h:109:19, please use with caution
 function mlx_vector_string_new()
     ccall((:mlx_vector_string_new, libmlxc), mlx_vector_string, ())
@@ -2183,6 +2401,10 @@ end
 
 function mlx_vector_string_get(res, vec, idx)
     ccall((:mlx_vector_string_get, libmlxc), Cint, (Ptr{Ptr{Cchar}}, mlx_vector_string, Csize_t), res, vec, idx)
+end
+
+function mlx_version(str_)
+    ccall((:mlx_version, libmlxc), Cint, (Ptr{mlx_string},), str_)
 end
 
 # exports
