@@ -53,6 +53,26 @@ jobs:
           arch: ${{ matrix.arch }}
       - uses: julia-actions/cache@v3
       - uses: julia-actions/julia-buildpkg@v1
+      - name: Load MLX_jll and its dependencies one by one
+        if: runner.os == 'Windows'
+        timeout-minutes: 10
+        shell: bash
+        run: |
+          julia --project=mlx_jll --color=yes -e '
+              using Pkg
+              Pkg.add(name = "MLX_jll", version = "0.23.2")
+              project_file = joinpath(dirname(dirname(Base.find_package("MLX_jll"))), "Project.toml")
+              deps = setdiff(keys(Pkg.Types.read_project(project_file).deps), ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "LazyArtifacts"])
+              Pkg.add(collect(deps))'
+          julia --project=mlx_jll --color=yes -e '
+              using Pkg
+              for dep in sort!(setdiff(collect(keys(Pkg.project().dependencies)), ["MLX_jll"]))
+                  println("Loading ", dep); flush(stdout)
+                  Base.require(Main, Symbol(dep))
+              end
+              println("Loading MLX_jll"); flush(stdout)
+              using MLX_jll
+              println("Loaded MLX_jll")'
       - name: Precompile and load
         timeout-minutes: 10
         env:
