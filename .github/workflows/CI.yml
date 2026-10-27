@@ -28,18 +28,21 @@ jobs:
               project_file = joinpath(dirname(dirname(Base.find_package("MLX_jll"))), "Project.toml")
               deps = setdiff(keys(Pkg.Types.read_project(project_file).deps), ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "LazyArtifacts"])
               Pkg.add(collect(deps))'
-      - name: Load MLX_jll, then exit without unloading (_exit)
+      - name: Load MLX_jll, then terminate without unloading (TerminateProcess)
         timeout-minutes: 2
         continue-on-error: true
         run: |
           julia --project=mlx_jll --color=yes -e '
               using MLX_jll
-              println("Loaded MLX_jll, exiting with _exit"); flush(stdout)
-              ccall(:_exit, Cvoid, (Cint,), 0)'
-      - name: Load MLX_jll, then exit normally (exit)
+              println("Loaded MLX_jll, terminating"); flush(stdout)
+              process = ccall((:GetCurrentProcess, "kernel32"), stdcall, Ptr{Cvoid}, ())
+              ccall((:TerminateProcess, "kernel32"), stdcall, Cint, (Ptr{Cvoid}, Cuint), process, 0)'
+      - name: Load MLX_jll, unload libmlx (dlclose), then exit
         timeout-minutes: 2
         run: |
           julia --project=mlx_jll --color=yes -e '
-              using MLX_jll
-              println("Loaded MLX_jll, exiting with exit"); flush(stdout)
+              using Libdl, MLX_jll
+              println("Loaded MLX_jll, unloading libmlx"); flush(stdout)
+              println("dlclose: ", Libdl.dlclose(MLX_jll.libmlx_handle)); flush(stdout)
+              println("Unloaded libmlx, exiting"); flush(stdout)
               exit(0)'
