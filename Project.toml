@@ -12,7 +12,7 @@ ScopedValues = "7e506255-f358-4e82-b7e4-beb19740aa63"
 CEnum = "0.5.0"
 MLX_C_jll = "0.1.2"
 ScopedValues = "1"
-julia = "1"
+julia = "1.9"
 
 [extras]
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
