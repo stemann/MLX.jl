@@ -16,6 +16,7 @@ makedocs(;
         "Home" => "index.md",
         "Tutorials" => ["tutorials/quick-start.md"],
         "Reference" => ["reference/api.md"],
+        "Explanation" => ["explanation/semantics.md"],
     ],
     checkdocs = :none,
 )

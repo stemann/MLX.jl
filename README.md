@@ -11,7 +11,7 @@ An `MLXArray` is an `AbstractArray` that can be used like an `Array`, but whose 
 
 MLX.jl aims to provide two APIs:
 
-- An `Array`-compatible API, where `Base` functions operate on `MLXArray`s like they do on `Array`, with some differences, e.g. operations may return `Float32` rather than `Float64` results, as MLX does not support `Float64` on GPUs.
+- An `Array`-compatible API, where `Base` functions operate on `MLXArray`s like they do on `Array`, with some differences, e.g. operations may return `Float32` rather than `Float64` results, as MLX does not support `Float64` on GPUs, see [Julia and MLX semantics](https://stemann.github.io/MLX.jl/explanation/semantics/).
 - An MLX-compatible API, where `MLX.<function>`s follow MLX's semantics, e.g. in broadcasting and type promotion, to ease porting code written for MLX in other languages.
 
 ## Supported platforms
