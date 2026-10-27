@@ -24,7 +24,7 @@ jobs:
         run: |
           julia --project=mlx_jll --color=yes -e '
               using Pkg
-              Pkg.add(name = "MLX_jll", version = "0.23.2")
+              Pkg.add(name = "MLX_jll", version = "0.25.1")
               project_file = joinpath(dirname(dirname(Base.find_package("MLX_jll"))), "Project.toml")
               deps = setdiff(keys(Pkg.Types.read_project(project_file).deps), ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "LazyArtifacts"])
               Pkg.add(collect(deps))'
