@@ -2,10 +2,10 @@ function argsort(a::MLXArray{<:Any, N}; dims::Union{Integer, Nothing} = nothing)
     s = get_stream()
     result = Ref(Wrapper.mlx_array_new())
     if isnothing(dims)
-        Wrapper.mlx_argsort_all(result, a, s)
+        Wrapper.mlx_argsort(result, a, s)
         return MLXVector{UInt32}(result[])
     end
-    Wrapper.mlx_argsort(result, a, Cint(dims) - one(Cint), s)
+    Wrapper.mlx_argsort_axis(result, a, Cint(dims) - one(Cint), s)
     return MLXArray{UInt32, N}(result[])
 end
 
