@@ -1,3 +1,13 @@
+"""
+    MLXArray{T, N} <: AbstractArray{T, N}
+    MLXArray(array::AbstractArray)
+
+An `N`-dimensional array of element type `T`, which can be used like an `Array`, but where
+operations are computed lazily by MLX, i.e. when their results are needed, or by
+[`MLX.evaluate`](@ref).
+
+`MLXArray(array)` copies `array`.
+"""
 mutable struct MLXArray{T, N} <: AbstractArray{T, N}
     mlx_array::Wrapper.mlx_array
 

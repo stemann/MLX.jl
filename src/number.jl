@@ -1,7 +1,8 @@
 """
     MLXNumber{T} <: Number
 
-A scalar held by MLX as a 0-dimensional array, which, like an `MLXArray`, is evaluated lazily.
+A scalar held by MLX as a 0-dimensional array, which can be used like a `T`, but where
+operations are computed lazily by MLX, as for an `MLXArray`.
 
 Comparisons and conversions to other `Number` types evaluate it.
 """

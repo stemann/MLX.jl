@@ -1,0 +1,43 @@
+name: Documentation
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  workflow_dispatch:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ startsWith(github.ref, 'refs/pull/') }}
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write # needed to allow julia-actions/cache to proactively delete old caches that it has created
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: julia-actions/setup-julia@v3
+        with:
+          version: '1'
+      - uses: julia-actions/cache@v3
+      - name: Install dependencies
+        run: julia --project=doc -e 'using Pkg; Pkg.instantiate()'
+      - name: Build and test documentation
+        run: julia --project=doc doc/make.jl
+      - uses: actions/upload-pages-artifact@v5
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        with:
+          path: doc/build
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
