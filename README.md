@@ -24,6 +24,7 @@ MLX.jl should support all of Julia's platforms, via the prebuilt binaries of [ML
 | macOS | x86_64 | CPU |
 | Linux (glibc) | aarch64 | CPU |
 | Linux (glibc) | x86_64 | CPU |
+| Windows | x86_64 | CPU |
 
 ## Installation
 

@@ -30,7 +30,7 @@ jobs:
           - macos-26-intel
           - ubuntu-24.04
           - ubuntu-24.04-arm
-          # - windows-2025 # Windows is hanging when precompiling
+          - windows-2025
         arch:
           - aarch64
           - x64

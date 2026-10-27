@@ -30,7 +30,7 @@ for (T, mlx_fn) in (
     (Bool, :mlx_array_new_bool),
     (Int32, :mlx_array_new_int),
     (Float32, :mlx_array_new_float32),
-    # (Float64, :mlx_array_new_float64), # TODO: mlx_array_new_float64 yields a float32 array in MLX C v0.1.2, cf. https://github.com/ml-explore/mlx-c/issues/58
+    (Float64, :mlx_array_new_float64),
 )
     @eval MLXNumber{$T}(x::$T) = MLXNumber{$T}(MLXArray{$T, 0}(Wrapper.$mlx_fn(x)))
 end

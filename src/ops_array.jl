@@ -9,7 +9,7 @@ function Base.dropdims(a::MLXArray{T, N}; dims::Union{Dims, Integer}) where {T, 
     s = get_stream()
     result = Ref(Wrapper.mlx_array_new())
     axes = collect(Cint.(dims isa Integer ? (dims,) : dims) .- one(Cint))
-    Wrapper.mlx_squeeze(result, a, axes, length(axes), s)
+    Wrapper.mlx_squeeze_axes(result, a, axes, length(axes), s)
     remaining_dims = Int(Wrapper.mlx_array_ndim(result[]))
     return MLXArray{T, remaining_dims}(result[])
 end
@@ -17,7 +17,7 @@ end
 function Base.sort(v::MLXVector{T}) where {T}
     s = get_stream()
     result = Ref(Wrapper.mlx_array_new())
-    Wrapper.mlx_sort_all(result, v, s)
+    Wrapper.mlx_sort(result, v, s)
     return MLXVector{T}(result[])
 end
 
@@ -25,7 +25,7 @@ function Base.sort(a::MLXArray{T, N}; dims::Integer) where {T, N}
     s = get_stream()
     result = Ref(Wrapper.mlx_array_new())
     axis = Cint(dims) - one(Cint)
-    Wrapper.mlx_sort(result, a, axis, s)
+    Wrapper.mlx_sort_axis(result, a, axis, s)
     return MLXArray{T, N}(result[])
 end
 
@@ -50,7 +50,7 @@ function Base.permutedims(a::MLXArray{T, N}, perm) where {T, N}
     s = get_stream()
     result = Ref(Wrapper.mlx_array_new())
     axes = collect(Cint.(perm) .- one(Cint))
-    Wrapper.mlx_transpose(result, a, axes, length(axes), s)
+    Wrapper.mlx_transpose_axes(result, a, axes, length(axes), s)
     # mlx_transpose yields a strided view; make it contiguous, like permutedims for Array
     transposed = MLXArray{T, N}(result[])
     result = Ref(Wrapper.mlx_array_new())

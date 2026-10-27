@@ -4,3 +4,4 @@ output_file_path = "../src/Wrapper.jl"
 module_name = "Wrapper"
 jll_pkg_name = "MLX_C_jll"
 export_symbol_prefixes = ["mlx"]
+use_julia_native_enum_type = true

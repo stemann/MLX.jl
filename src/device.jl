@@ -71,7 +71,7 @@ function Base.setproperty!(::Device, name::Symbol, value)
     throw(ArgumentError("Field $name should not be set"))
 end
 
-Base.:(==)(a::Device, b::Device) = Wrapper.mlx_device_equal(a, b) == 1 # TODO mlx_device_equal should return Bool and not Cint
+Base.:(==)(a::Device, b::Device) = Wrapper.mlx_device_equal(a, b)
 
 function Base.show(io::IO, device::Device)
     print(io, "MLX.Device(; device_type = MLX.$(device.type), index = $(device.index))")
