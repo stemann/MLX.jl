@@ -1,5 +1,7 @@
 module MLX
 
+using BFloat16s: BFloat16
+
 @static if VERSION < v"1.11"
     using ScopedValues
 else
