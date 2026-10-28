@@ -14,9 +14,8 @@ function supported_number_types(device_type::DeviceType = DeviceTypeCPU)
         Int16,
         Int32,
         Int64,
-        # TODO Float16, 
+        Float16,
         Float32,
-        # TODO Core.BFloat16
         ComplexF32,
     ]
     if device_type == DeviceTypeCPU

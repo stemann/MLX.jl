@@ -8,15 +8,23 @@ CEnum = "fa961155-64e5-5f13-b03f-caf6b980ea82"
 MLX_C_jll = "6073304d-8c11-559f-8a83-5ce24a08dcab"
 ScopedValues = "7e506255-f358-4e82-b7e4-beb19740aa63"
 
+[weakdeps]
+BFloat16s = "ab4f0b2a-ad5b-11e8-123f-65d77653426b"
+
+[extensions]
+MLXBFloat16sExt = "BFloat16s"
+
 [compat]
+BFloat16s = "0.6"
 CEnum = "0.5.0"
 MLX_C_jll = "0.1.2"
 ScopedValues = "1"
 julia = "1.9"
 
 [extras]
+BFloat16s = "ab4f0b2a-ad5b-11e8-123f-65d77653426b"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Random", "Test"]
+test = ["BFloat16s", "Random", "Test"]

@@ -23,7 +23,6 @@ function Base.convert(::Type{Wrapper.mlx_dtype}, type::Type{<:Number})
         return Wrapper.MLX_FLOAT32
     elseif type == Float64
         return Wrapper.MLX_FLOAT64
-        # TODO Handle Wrapper.MLX_BFLOAT16
     elseif type == ComplexF32
         return Wrapper.MLX_COMPLEX64
     else
@@ -56,9 +55,17 @@ function Base.convert(::Type{Number}, dtype::Wrapper.mlx_dtype)
         return Float32
     elseif dtype == Wrapper.MLX_FLOAT64
         return Float64
-        # TODO Handle Wrapper.MLX_BFLOAT16
     elseif dtype == Wrapper.MLX_COMPLEX64
         return ComplexF32
+    elseif dtype == Wrapper.MLX_BFLOAT16
+        # BFloat16 is supported via the extension for BFloat16s
+        extension = Base.get_extension(MLX, :MLXBFloat16sExt)
+        if isnothing(extension)
+            throw(
+                ArgumentError("Unsupported mlx_dtype: $dtype, unless BFloat16s is loaded")
+            )
+        end
+        return extension.BFloat16
     else
         throw(ArgumentError("Unsupported mlx_dtype: $dtype"))
     end
