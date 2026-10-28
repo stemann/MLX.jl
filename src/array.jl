@@ -134,12 +134,14 @@ function Base.unsafe_convert(::Type{Ptr{T}}, array::MLXArray{T, N}) where {T, N}
         mlx_array_data = Wrapper.mlx_array_data_int32
     elseif T == Int64
         mlx_array_data = Wrapper.mlx_array_data_int64
-        # TODO generate wrapper on system with HAS_FLOAT16
+    elseif T == Float16
+        # MLX C only declares the Float16 accessor on aarch64, but MLX does not check the
+        # element type of an accessor
+        mlx_array_data = array -> Ptr{Float16}(Wrapper.mlx_array_data_uint16(array))
     elseif T == Float32
         mlx_array_data = Wrapper.mlx_array_data_float32
     elseif T == Float64
         mlx_array_data = Wrapper.mlx_array_data_float64
-        # TODO generate wrapper on system with HAS_BFLOAT16
     elseif T == ComplexF32
         mlx_array_data = Wrapper.mlx_array_data_complex64
     else

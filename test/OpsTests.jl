@@ -80,8 +80,9 @@ using .TestUtils
     test_values(T) =
         T <: Integer && T != Bool ? (T <: Signed ? (T(-10):T(10)) : (T(0):T(10))) : T
 
-    # MLX 0.23.2 computes some Float64 functions with about Float32 precision
-    rtol = sqrt(eps(Float32))
+    # MLX 0.23.2 computes some Float64 functions with about Float32 precision, and e.g.
+    # deg2rad of Float16 to within one ulp
+    tolerance(T) = T == Float16 ? eps(Float16) : sqrt(eps(Float32))
 
     for (fn_symbol, fn_def) in MLX.Internals.get_unary_ops()
         fn = eval(fn_symbol)
@@ -99,16 +100,28 @@ using .TestUtils
             end
             mlx_array = to_mlx(array)
             TOut = fn_def.output_type(T)
+            rtol = tolerance(TOut)
             if T <: Integer # Base returns Float64 for integer inputs, where MLX 0.23.2 returns Float32
                 expected = TOut.(fn.(array))
+            elseif T == Float16 # Julia before 1.13 computes e.g. deg2rad of Float16 to within one ulp
+                expected = TOut.(fn.(Float32.(array)))
             else
                 expected = fn.(array)
             end
             actual = fn.(mlx_array)
             @test actual isa (N == 0 ? MLXNumber{TOut} : MLXArray{TOut, N})
             @test convert(Number, MLX.Wrapper.mlx_array_dtype(actual)) == TOut
+            # MLX before 0.32.4 computes isfinite, isinf and isnan of Float16 wrongly with NEON
+            # on 8 or more elements
+            broken =
+                fn in (isfinite, isinf, isnan) &&
+                T == Float16 &&
+                Sys.isapple() &&
+                Sys.ARCH == :aarch64 &&
+                MLX.device[].type == MLX.DeviceTypeCPU &&
+                prod(array_size) >= 8
             if TOut <: Integer
-                @test actual == expected
+                @test actual == expected broken = broken
             elseif N == 0
                 @test isapprox(TOut(actual), expected; rtol)
             else
@@ -119,7 +132,8 @@ using .TestUtils
         testset_foreach_type("$fn(::MLXNumber)"; element_types = input_types) do T
             value = only(fn_def.test_input([rand(test_values(T))], T))
             TOut = fn_def.output_type(T)
-            expected = fn(value)
+            rtol = tolerance(TOut)
+            expected = T == Float16 ? TOut(fn(Float32(value))) : fn(value)
             actual = fn(MLXNumber(value))
             if fn in (isfinite, isinf, isnan)
                 @test actual === expected
@@ -192,6 +206,7 @@ using .TestUtils
                         fn_def.compute_type(T, S)
                     end
                     N = max(ndims(a), ndims(b))
+                    rtol = tolerance(C)
                     expected = C.(fn.(a, b)) # e.g. Float32 rather than Float64 for integer division
                     actual = fn.(to_mlx_operand(a), to_mlx_operand(b))
                     @test actual isa (N == 0 ? MLXNumber{C} : MLXArray{C, N})
