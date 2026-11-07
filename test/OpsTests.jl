@@ -30,8 +30,7 @@ using .TestUtils
         @test actual == expected
     end
 
-    # isless is not defined for complex numbers, and MLX 0.23.2 does not support sorting Bool on
-    # the GPU
+    # isless is not defined for complex numbers, and MLX 0.25.1 has no GPU kernel for sorting Bool
     function sortable_types(device_type)
         return filter(MLX.supported_number_types(device_type)) do T
             return T <: Real && !(T == Bool && device_type == MLX.DeviceTypeGPU)
@@ -80,7 +79,7 @@ using .TestUtils
     test_values(T) =
         T <: Integer && T != Bool ? (T <: Signed ? (T(-10):T(10)) : (T(0):T(10))) : T
 
-    # MLX 0.23.2 computes some Float64 functions with about Float32 precision
+    # MLX 0.25.1 computes e.g. sin, cos and exp of Float64 with about Float32 precision
     rtol = sqrt(eps(Float32))
 
     for (fn_symbol, fn_def) in MLX.Internals.get_unary_ops()
@@ -99,7 +98,7 @@ using .TestUtils
             end
             mlx_array = to_mlx(array)
             TOut = fn_def.output_type(T)
-            if T <: Integer # Base returns Float64 for integer inputs, where MLX 0.23.2 returns Float32
+            if T <: Integer # Base returns Float64 for integer inputs, where MLX 0.25.1 returns Float32
                 expected = TOut.(fn.(array))
             else
                 expected = fn.(array)
@@ -215,7 +214,7 @@ using .TestUtils
         @test sin.(MLXArray([1, 2])) isa MLXVector{Float32}
         @test MLXArray([1, 2]) / 2 isa MLXVector{Float32}
         @test MLXArray([1, 2]) ./ MLXArray([2, 4]) isa MLXVector{Float32}
-        # Ops on Array return ComplexF64, which MLX 0.23.2 does not support
+        # Ops on Array return ComplexF64, which MLX 0.25.1 does not support
         @test_throws ArgumentError MLXArray(ComplexF32[1, 2]) .* 2.0
     end
 

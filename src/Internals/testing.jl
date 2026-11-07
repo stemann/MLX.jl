@@ -23,7 +23,7 @@ function clamp_to_unit_interval(a, ::Type{TIn}) where {TIn}
     return TIn.(clamp.(a, -1, 1))
 end
 
-# MLX 0.23.2 has no complex GPU kernels for some ops, e.g. asin
+# MLX 0.25.1 has no complex GPU kernels for some ops, e.g. asinh
 real_on_gpu(device_type) = device_type == DeviceTypeGPU ? Real : Number
 
 # Replaces zeros by ones, e.g. in divisors
